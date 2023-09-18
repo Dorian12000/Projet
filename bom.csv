@@ -1,7 +1,6 @@
 Composants;référence;quantité;
 microcontrolleur;STM32G070RBT6;1;
 Quartz 16 MHz;MCSJK-7U-16.00-10-30-80-B-30;1;
-;;;
 Connecteur SWD/STLink;M50-3600742;1;
 Driver moteur;ZXBM5210-S;2;
 Moteurs;DfRobot FIT0520;2;
