@@ -1,5 +1,6 @@
 # Projet
-robot chat
-![Uploading image.png…]()
+
+![robot chat](chat.jpg)
+
 
 Schéma Fonctionnel : https://miro.com/app/dashboard/
