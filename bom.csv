@@ -7,7 +7,7 @@ Moteurs;DfRobot FIT0520;2;
 Régulateur 5V;AZ1117CH2-5.0TRG1;1;
 Régulateur 3,3V;MIC5317-3.3YM5;1;
 Batterie;NIMH 7.2V 1.3Ah;1;
-Capteur bordure;Sharp GP2Y0D805Z0F;4;
+Capteur bordure;Sharp GP2Y0D805Z0F;2;
 Lidar;YDLIDAR X4;1;
 Connecteurs JST 2.54mm;;1;
 LED;;3;
