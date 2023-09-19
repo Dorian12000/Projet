@@ -322,6 +322,23 @@
     "subpart_first_id": 65,
     "subpart_id_separator": 0
   },
-  "sheets": [],
+  "sheets": [
+    [
+      "c2f64bd1-6e8c-43e0-a388-b0d49de070d9",
+      ""
+    ],
+    [
+      "0b5cebe4-fd14-4884-9a5c-ceb429f5c8b1",
+      "STM32"
+    ],
+    [
+      "80bfdb32-6829-4c0b-a32e-b40575eec0c4",
+      "Motor"
+    ],
+    [
+      "a3f3139b-81b6-43b0-b29b-f66cb4972e1f",
+      "Power"
+    ]
+  ],
   "text_variables": {}
 }
