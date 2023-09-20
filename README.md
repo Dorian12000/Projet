@@ -1,6 +1,4 @@
-# Projet
-Collaborators: Dorian DALBIN, Clément DU, Laksan THIRUKUMARAN, Gael GOURDIN
-<img src="chat.jpg" alt="robot chat" width="400">
+<img src="img/github-header-image.png" alt="robot chat">
 
 Schéma Fonctionnel : https://miro.com/app/dashboard/
-<img src="Schema_fonctionnel.png" alt="schéma fonctionnel" width="1375">
+<img src="img/Schema_fonctionnel.png" alt="schéma fonctionnel" width="1375">
