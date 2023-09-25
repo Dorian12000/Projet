@@ -46,7 +46,7 @@ static inline void _addtobuf(char c){
 static inline void _sendbuf(void){
 	uint16_t i=0;
 	for(i=0; i<_logbuf_i; i++){
-		HAL_UART_Transmit(&hlpuart1,&(_logbuf[i]),1,10);
+		HAL_UART_Transmit(&huart1,&(_logbuf[i]),1,10);
 	}
 	_log_route = 0;
 }
@@ -55,7 +55,7 @@ static inline void _sendbuf(void){
 static inline void _putchar(char c)
 {
 	if(_log_route == 0) {
-		HAL_UART_Transmit(&hlpuart1,&c,1,10);
+		HAL_UART_Transmit(&huart1,&c,1,10);
 	}
 	else{
 		_addtobuf(c);
