@@ -18,6 +18,12 @@
 #include "tim.h"
 #include "gpio.h"
 
+#define LIDAR_START 		0xA55A
+#define LIDAR_SCAN_START 	0xA560
+#define LIDAR_SCAN_STOP 	0xA565
+#define LIDAR_RESTART 		0xA580
+#define GET_DEV_ID 			0xA591
+
 #define LIDAR_MOTOR_ENABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_SET)
 #define LIDAR_MOTOR_DISABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_RESET)
 
