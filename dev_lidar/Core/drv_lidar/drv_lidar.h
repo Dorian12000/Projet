@@ -22,7 +22,8 @@
 #define LIDAR_SCAN_START 	0xA560
 #define LIDAR_SCAN_STOP 	0xA565
 #define LIDAR_RESTART 		0xA580
-#define GET_DEV_ID 			0xA591
+#define GET_DEV_ID 			0xA590
+#define GET_HEALTH_STATUS	0XA591
 
 #define LIDAR_MOTOR_ENABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_SET)
 #define LIDAR_MOTOR_DISABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_RESET)
@@ -45,3 +46,4 @@ typedef struct lidar_s{
 
 void LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
+void LidarGetInformation(void);

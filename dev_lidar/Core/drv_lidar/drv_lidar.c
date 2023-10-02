@@ -25,17 +25,21 @@
 lidar_t lidar;
 
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t address, uint8_t *p_data, uint16_t size) {
+	HAL_StatusTypeDef status;
 	HAL_UART_Transmit(&huart1, &address, 2, HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart1, p_data, size, HAL_MAX_DELAY);
+	return status;
 }
 
-static inline HAL_StatusTypeDef LidarUarRx(uint8_t address, uint8_t *p_data, uint16_t size) {
+static inline HAL_StatusTypeDef LidarUartRx(uint8_t address, uint8_t *p_data, uint16_t size) {
+	HAL_StatusTypeDef status;
 	HAL_UART_Receive(&huart1, p_data, size, HAL_MAX_DELAY);
+	return status;
 }
 
 void LidarInit(void) {
 	lidar.uart.tx = LidarUarTx;
-	lidar.uart.rx = LidarUarRx;
+	lidar.uart.rx = LidarUartRx;
 }
 
 /**
@@ -54,5 +58,8 @@ void LidarSetSpeed(uint8_t speed) {
 }
 
 void LidarGetInformation(void) {
-	lidar.uart.tx (GET_DEV_ID, NULL, 0);
+	lidar.uart.tx(GET_DEV_ID, NULL, 0);
+	uint8_t buf[20];
+	lidar.uart.rx(NULL, buf, 20);
+	LOG_MAIN_INFO("%b", buf, 20);
 }
