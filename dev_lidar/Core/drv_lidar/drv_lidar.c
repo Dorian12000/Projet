@@ -1,4 +1,3 @@
-
 /**
  *     _______    _____     __     ______    _______        ____
  *    |   ____|  |     \   |  |   / _____)  |   ____|      /    \
@@ -23,10 +22,10 @@
 
 #include "drv_lidar.h"
 
-LidarUart_t lidar;
+lidar_t lidar;
 
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t address, uint8_t *p_data, uint16_t size) {
-	HAL_UART_Transmit(&huart1, &address, size, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, &address, 2, HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart1, p_data, size, HAL_MAX_DELAY);
 }
 
@@ -35,8 +34,8 @@ static inline HAL_StatusTypeDef LidarUarRx(uint8_t address, uint8_t *p_data, uin
 }
 
 void LidarInit(void) {
-	lidar.Tx = LidarUarTx;
-	lidar.Rx = LidarUarRx
+	lidar.uart.tx = LidarUarTx;
+	lidar.uart.rx = LidarUarRx;
 }
 
 /**
@@ -52,4 +51,8 @@ void LidarInit(void) {
 void LidarSetSpeed(uint8_t speed) {
 	speed += 49;
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1 ,speed);
+}
+
+void LidarGetInformation(void) {
+	lidar.uart.tx (GET_DEV_ID, NULL, 0);
 }
