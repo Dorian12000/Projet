@@ -18,10 +18,14 @@
 #include "tim.h"
 #include "gpio.h"
 
-#include "log/logger.h"
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "../Inc/log/logger.h"
 
 #include "drv_lidar.h"
 
+extern UART_HandleTypeDef huart1;
 lidar_t lidar;
 
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t address, uint8_t *p_data, uint16_t size) {
@@ -57,9 +61,22 @@ void LidarSetSpeed(uint8_t speed) {
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1 ,speed);
 }
 
-void LidarGetInformation(void) {
-	lidar.uart.tx(GET_DEV_ID, NULL, 0);
+void LidarScan(uint8_t *data, int size) {
+
+}
+
+void LidarGetInformation(lidar_devEUI_t *devEUI) {
+	LOG_MAIN_ENTER();
+	//lidar.uart.tx(GET_DEV_ID, NULL, 0);
+	uint8_t command[2];
+	command[0]=0xA5;
+	command[1]=0x90;
+	HAL_StatusTypeDef status = HAL_UART_Transmit(&huart1, command, 2, HAL_MAX_DELAY);
+	LOG_MAIN_DEBUG("statuts: %d", status);
+	//uint8_t *buf = (uint8_t*) malloc(20 * sizeof(uint8_t));
+	//lidar.uart.rx(NULL, buf, 20);
 	uint8_t buf[20];
-	lidar.uart.rx(NULL, buf, 20);
-	LOG_MAIN_INFO("%b", buf, 20);
+	HAL_UART_Receive (&huart1, buf, 20, HAL_MAX_DELAY);
+	LOG_MAIN_DEBUG("buf: %b", buf, 20);
+	//free(buf);
 }

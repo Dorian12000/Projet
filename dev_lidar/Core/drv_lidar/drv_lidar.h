@@ -27,6 +27,8 @@
 
 #define LIDAR_MOTOR_ENABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_SET)
 #define LIDAR_MOTOR_DISABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_RESET)
+#define LIDAR_DEV_ENABLE()	HAL_GPIO_WritePin(DEV_EN_GPIO_Port, DEV_EN_Pin, GPIO_PIN_SET)
+#define LIDAR_DEV_DISABLE()	HAL_GPIO_WritePin(DEV_EN_GPIO_Port, DEV_EN_Pin, GPIO_PIN_RESET)
 
 typedef int (* uart_tx_t)(uint8_t address, uint8_t *p_data, uint16_t size);
 typedef int (* uart_rx_t)(uint8_t address, uint8_t *p_data, uint16_t size);
@@ -44,6 +46,13 @@ typedef struct lidar_s{
 	uint16_t CS; // check code
 }lidar_t;
 
+typedef struct lidar_devEUI_s {
+	uint8_t ModelNumber;
+	uint16_t FirmWareVersion;
+	uint8_t HardWareVersion;
+	int SerialNumber;
+}lidar_devEUI_t;
+
 void LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
-void LidarGetInformation(void);
+void LidarGetInformation(lidar_devEUI_t *devEUI);
