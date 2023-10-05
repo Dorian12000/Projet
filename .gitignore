@@ -53,3 +53,4 @@ dkms.conf
 
 # ignore PCB folder
 PCB/
+Tets/
