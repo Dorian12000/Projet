@@ -18,6 +18,11 @@ void initPID(PID *pid, float kp, float ki, float kd, float Te)
 	pid->ordre = 3;
 }
 
+void error(PID *pid, float *inputs, float speed, float speed_mes)
+{
+	inputs[pid->index] = speed - speed_mes;
+}
+
 void correcteur(PID *pid, float *inputs, float *outputs)
 {
 	uint8_t ordre = pid->ordre;

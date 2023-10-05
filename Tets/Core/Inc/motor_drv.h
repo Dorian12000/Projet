@@ -12,8 +12,6 @@
 #include <stdint.h>
 #include "tim.h"
 
-#define RES_ENCODER 224.4 // Impulsions de l'encoder pour 1 tour
-
 typedef enum h_motor_state
 {
 	FWD,

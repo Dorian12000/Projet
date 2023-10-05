@@ -8,9 +8,6 @@
 #ifndef INC_PID_H_
 #define INC_PID_H_
 
-extern float pid_error_input[3]; // mettre tout à 0
-extern float pid_output[3]; 	 // mettre tout à 0
-
 #include <stdint.h>
 
 typedef struct PID_struct
@@ -23,6 +20,7 @@ typedef struct PID_struct
 }PID;
 
 void initPID(PID *pid, float kp, float ki, float kd, float Te);
+void error(PID *pid, float *inputs, float speed, float spead_mes);
 void correcteur(PID *pid, float *inputs, float *outputs);
 
 #endif /* INC_PID_H_ */

@@ -1,0 +1,3 @@
+../Core/Src/pwm.c:10:6:initPwm	1
+../Core/Src/pwm.c:16:6:stopPwm	1
+../Core/Src/pwm.c:22:6:setPwmDutyCycle	8

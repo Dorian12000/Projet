@@ -1,2 +1,2 @@
 ../Core/Src/encoder.c:10:10:readEncoder	1
-../Core/Src/encoder.c:15:10:convertEncoderToSpeed	1
+../Core/Src/encoder.c:15:7:convertEncoderToSpeed	1

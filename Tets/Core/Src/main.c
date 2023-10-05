@@ -17,7 +17,6 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <pwm.h>
 #include "main.h"
 #include "usart.h"
 #include "tim.h"
@@ -102,20 +101,22 @@ int main(void)
   HAL_TIM_Base_Start(&htim1);
   HAL_TIM_Base_Start(&htim2);
 
-	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 
-  // Motor init
+  // Pwm motor init
   PWM fwd = {&htim1, TIM_CHANNEL_1, 0.0};
   PWM rev = {&htim1, TIM_CHANNEL_2, 0.0};
+  initPwm(&fwd);
+  initPwm(&rev);
+
+  // Motor init
   initMotor(&motor_left, &fwd, &rev);
 
-
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 10);
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 15);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  // Start Pwm
+  setPwmDutyCycle(&fwd, 0.2f);
 
   int i = 0;
-  uint32_t prev_encoder_value = 0;
+  uint32_t prev_encoder_value = readEncoder(&htim2);
   uint32_t current_encoder_value;
   uint32_t start_ms = HAL_GetTick();
   uint32_t end_ms;
@@ -130,15 +131,27 @@ int main(void)
 	  {
 		  current_encoder_value = readEncoder(&htim2);
 		  end_ms = HAL_GetTick();
+
 		  time_ms = end_ms - start_ms;
+
+		  printf("i = %d\n\r", i);
+		  printf("%ld\n\r", end_ms);
+		  printf("Time = %ld\r\n", time_ms);
 		  printf("Encoder = %ld\r\n", current_encoder_value);
-		  printf("Speed = %ld\r\n", convertEncoderToSpeed(prev_encoder_value, current_encoder_value, time_ms));
-		  HAL_Delay(1000);
-		  i++;
+		  printf("Speed = %f\r\n", convertEncoderToSpeed(prev_encoder_value, current_encoder_value, time_ms));
+		  printf("\n\n");
 		  prev_encoder_value = current_encoder_value;
 		  start_ms = end_ms;
+
+		  HAL_Delay(1000);
+		  i++;
+
+		  if(i == 7)
+		  {
+			  setPwmDutyCycle(&fwd, 0.3f);
+		  }
 	  }
-	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+	  stopPwm(&fwd);
 
     /* USER CODE END WHILE */
 
