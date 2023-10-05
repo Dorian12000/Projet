@@ -46,6 +46,18 @@ typedef struct lidar_s{
 	uint16_t CS; // check code
 }lidar_t;
 
+
+typedef struct Lidar_sc{
+	uint16_t PH; // PACKET HEADER
+	uint8_t CT; //Package Type
+	uint8_t LSN; // Sample quantity
+	uint16_t FSA; // Start Angle
+	uint16_t LSA; // Stop Angle
+	uint16_t CS; // Check code
+	uint16_t SI; // sample data
+}lidar_scan_t;
+
+
 typedef struct lidar_devEUI_s {
 	uint8_t ModelNumber;
 	uint16_t FirmWareVersion;
@@ -56,3 +68,4 @@ typedef struct lidar_devEUI_s {
 void LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
 void LidarGetInformation(lidar_devEUI_t *devEUI);
+void LidarScanStart(lidar_scan_t *lidscan);
