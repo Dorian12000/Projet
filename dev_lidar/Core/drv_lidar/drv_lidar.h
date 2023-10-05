@@ -50,7 +50,7 @@ typedef struct lidar_devEUI_s {
 	uint8_t ModelNumber;
 	uint16_t FirmWareVersion;
 	uint8_t HardWareVersion;
-	int SerialNumber;
+	uint8_t SerialNumber[16];
 }lidar_devEUI_t;
 
 void LidarInit(void);

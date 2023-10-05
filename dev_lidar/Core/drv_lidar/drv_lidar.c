@@ -20,24 +20,26 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../Inc/log/logger.h"
 
 #include "drv_lidar.h"
 
-extern UART_HandleTypeDef huart1;
+uint8_t buf[20];
 lidar_t lidar;
 
-static inline HAL_StatusTypeDef LidarUarTx(uint8_t address, uint8_t *p_data, uint16_t size) {
+static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	HAL_StatusTypeDef status;
-	HAL_UART_Transmit(&huart1, &address, 2, HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart1, p_data, size, HAL_MAX_DELAY);
+	LOG_MAIN_DEBUG("%02X%02X", address[0], address[1]);
+	status = HAL_UART_Transmit(&huart1, address, 2, 500);
+	//HAL_UART_Transmit(&huart1, p_data, size, HAL_MAX_DELAY);
 	return status;
 }
 
-static inline HAL_StatusTypeDef LidarUartRx(uint8_t address, uint8_t *p_data, uint16_t size) {
+static inline HAL_StatusTypeDef LidarUartRx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	HAL_StatusTypeDef status;
-	HAL_UART_Receive(&huart1, p_data, size, HAL_MAX_DELAY);
+	status = HAL_UART_Receive(&huart1, p_data, size, 500);
 	return status;
 }
 
@@ -61,22 +63,22 @@ void LidarSetSpeed(uint8_t speed) {
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1 ,speed);
 }
 
-void LidarScan(uint8_t *data, int size) {
-
-}
-
 void LidarGetInformation(lidar_devEUI_t *devEUI) {
-	LOG_MAIN_ENTER();
-	//lidar.uart.tx(GET_DEV_ID, NULL, 0);
-	uint8_t command[2];
-	command[0]=0xA5;
-	command[1]=0x90;
-	HAL_StatusTypeDef status = HAL_UART_Transmit(&huart1, command, 2, HAL_MAX_DELAY);
-	LOG_MAIN_DEBUG("statuts: %d", status);
-	//uint8_t *buf = (uint8_t*) malloc(20 * sizeof(uint8_t));
+	HAL_StatusTypeDef status;
+	uint8_t command[2] = {0xA5, 0x90};
+	//status = lidar.uart.tx(command, NULL, 0);
+	status = HAL_UART_Transmit(&huart1, command, 2, 500);
+	if(status != HAL_OK) {
+		LOG_MAIN_ERROR("transmit error: %d", status);
+	}
+	uint8_t *buf = (uint8_t*) malloc(20+7 * sizeof(uint8_t));
 	//lidar.uart.rx(NULL, buf, 20);
-	uint8_t buf[20];
-	HAL_UART_Receive (&huart1, buf, 20, HAL_MAX_DELAY);
-	LOG_MAIN_DEBUG("buf: %b", buf, 20);
-	//free(buf);
+	if(HAL_UART_Receive(&huart1, buf, 20+7, 500) == HAL_OK) {
+		LOG_MAIN_DEBUG("buf: %b", buf, 20+7);
+	}
+	memcpy(&(devEUI->ModelNumber), &(buf[7]), 1);
+	memcpy(&(devEUI->FirmWareVersion), &(buf[7+1]), 2);
+	memcpy(&(devEUI->HardWareVersion), &(buf[7+3]), 1);
+	memcpy(&(devEUI->SerialNumber), &(buf[7+4]), 16);
+	free(buf);
 }
