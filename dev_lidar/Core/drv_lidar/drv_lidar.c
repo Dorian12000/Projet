@@ -27,6 +27,8 @@
 #include "drv_lidar.h"
 
 uint8_t buf[20];
+uint8_t buf2[3];
+uint8_t trameBase = 7;
 lidar_t lidar;
 
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, uint16_t size) {
@@ -106,4 +108,20 @@ void LidarScanStart(lidar_scan_t *lidscan){
 		memcpy(&(lidscan->SI), &(buf[7+10]),10);
 
 		free(buf);
+}
+
+void LidarHealthStatus(lidar_healthStatus_t *healthStatus) {
+	HAL_StatusTypeDef status;
+	uint8_t command[2] = {0xA5, 0x91};
+	if(status != HAL_OK) {
+		LOG_MAIN_ERROR("transmit error: %d", status);
+	}
+	uint8_t *buf2 = (uint8_t*) malloc(sizeof(buf2)+trameBase * sizeof(uint8_t));
+
+	if(HAL_UART_Receive(&huart1, buf, sizeof(buf2)+trameBase, 500) == HAL_OK) {
+		LOG_MAIN_DEBUG("buf: %b", buf, sizeof(buf2)+trameBase);
+		memcpy(&(healthStatus->StatusCode), &(buf2[trameBase]), 1);
+		memcpy(&(healthStatus->ErrorCode), &(buf2[trameBase+1]), 2);
+	}
+	free(buf2);
 }

@@ -65,7 +65,14 @@ typedef struct lidar_devEUI_s {
 	uint8_t SerialNumber[16];
 }lidar_devEUI_t;
 
+typedef struct lidar_healthStatus_s{
+	uint8_t StatusCode;
+	uint8_t ErrorCode;
+}lidar_healthStatus_t;
+
 void LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
 void LidarGetInformation(lidar_devEUI_t *devEUI);
 void LidarScanStart(lidar_scan_t *lidscan);
+void LidarHealthStatus(lidar_healthStatus_t *healthStatus);
+

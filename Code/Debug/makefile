@@ -61,8 +61,8 @@ all: main-build
 main-build: PROJET_ESE.elf secondary-outputs
 
 # Tool invocations
-PROJET_ESE.elf PROJET_ESE.map: $(OBJS) $(USER_OBJS) C:\Users\gourd\OneDrive\Bureau\ESE\Projet\Projet\Code\STM32G070RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "PROJET_ESE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\gourd\OneDrive\Bureau\ESE\Projet\Projet\Code\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PROJET_ESE.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+PROJET_ESE.elf PROJET_ESE.map: $(OBJS) $(USER_OBJS) C:\Users\cleme\Desktop\3A\Projet\Code\STM32G070RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "PROJET_ESE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\cleme\Desktop\3A\Projet\Code\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PROJET_ESE.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
