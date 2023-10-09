@@ -34,8 +34,7 @@ lidar_t lidar;
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	HAL_StatusTypeDef status;
 	LOG_MAIN_DEBUG("transmit 0x%02X%02X", address[0], address[1]);
-	status = HAL_UART_Transmit(&huart1, address, 2, 500);
-	//HAL_UART_Transmit(&huart1, p_data, size, HAL_MAX_DELAY);
+	status = HAL_UART_Transmit_DMA(&huart1, address, 2);
 	return status;
 }
 
@@ -68,7 +67,8 @@ void LidarSetSpeed(uint8_t speed) {
 void LidarGetInformation(lidar_devEUI_t *devEUI) {
 	HAL_StatusTypeDef status;
 	uint8_t command[COMMAND_SIZE] = {(GET_DEV_ID & 0xFF00) >> 8, (GET_DEV_ID & 0x00FF)};
-	if(lidar.uart.tx(&command, NULL, 0) != HAL_OK) {
+	status = lidar.uart.tx(command, NULL, 0);
+	if(status != HAL_OK) {
 		LOG_MAIN_ERROR("transmit error: %d", status);
 	}
 	uint8_t *version = (uint8_t*) malloc((MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE + HEADER_SIZE) * sizeof(uint8_t));
