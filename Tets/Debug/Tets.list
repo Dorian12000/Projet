@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000d4c  00000000  00000000  00037f48  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0001fb8a  00000000  00000000  00038c94  2**0
+ 17 .debug_macro  0001fb9f  00000000  00000000  00038c94  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   000159cb  00000000  00000000  0005881e  2**0
+ 18 .debug_line   000159ce  00000000  00000000  00058833  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000c7c16  00000000  00000000  0006e1e9  2**0
+ 19 .debug_str    000c7c10  00000000  00000000  0006e201  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  000057f8  00000000  00000000  00135e00  2**2
+ 20 .debug_frame  000057f8  00000000  00000000  00135e14  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000060  00000000  00000000  0013b5f8  2**0
+ 21 .debug_line_str 00000064  00000000  00000000  0013b60c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1560,7 +1560,6 @@ int main(void)
  8001156:	4618      	mov	r0, r3
  8001158:	f000 f900 	bl	800135c <setPwmDutyCycle>
 
-
   int i = 0;
  800115c:	2300      	movs	r3, #0
  800115e:	62fb      	str	r3, [r7, #44]	; 0x2c
@@ -1580,10 +1579,11 @@ int main(void)
 	  while(i < 15)
  800116e:	e043      	b.n	80011f8 <main+0x114>
 	  {
-		  current_encoder_value = readEncoder(&htim2);
- 8001170:	4827      	ldr	r0, [pc, #156]	; (8001210 <main+0x12c>)
- 8001172:	f7ff fedf 	bl	8000f34 <readEncoder>
- 8001176:	6238      	str	r0, [r7, #32]
+		  current_encoder_value = READ_ENCODER(htim2);
+ 8001170:	4b27      	ldr	r3, [pc, #156]	; (8001210 <main+0x12c>)
+ 8001172:	681b      	ldr	r3, [r3, #0]
+ 8001174:	6a5b      	ldr	r3, [r3, #36]	; 0x24
+ 8001176:	623b      	str	r3, [r7, #32]
 		  end_ms = HAL_GetTick();
  8001178:	f000 fd3e 	bl	8001bf8 <HAL_GetTick>
  800117c:	61f8      	str	r0, [r7, #28]
@@ -1905,7 +1905,6 @@ void stopPwm(PWM *pwm)
  800135a:	bd80      	pop	{r7, pc}
 
 0800135c <setPwmDutyCycle>:
-
 
 void setPwmDutyCycle(PWM *pwm, float duty_cycle)
 {
@@ -3337,49 +3336,109 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
  8001ad8:	40021000 	.word	0x40021000
 
 08001adc <Reset_Handler>:
+
+    .section	.text.Reset_Handler
+	.weak	Reset_Handler
+	.type	Reset_Handler, %function
+Reset_Handler:
+  ldr   r0, =_estack
  8001adc:	480d      	ldr	r0, [pc, #52]	; (8001b14 <LoopForever+0x2>)
+  mov   sp, r0          /* set stack pointer */
  8001ade:	4685      	mov	sp, r0
+
+/* Copy the data segment initializers from flash to SRAM */
+  ldr r0, =_sdata
  8001ae0:	480d      	ldr	r0, [pc, #52]	; (8001b18 <LoopForever+0x6>)
+  ldr r1, =_edata
  8001ae2:	490e      	ldr	r1, [pc, #56]	; (8001b1c <LoopForever+0xa>)
+  ldr r2, =_sidata
  8001ae4:	4a0e      	ldr	r2, [pc, #56]	; (8001b20 <LoopForever+0xe>)
+  movs r3, #0
  8001ae6:	2300      	movs	r3, #0
+  b	LoopCopyDataInit
  8001ae8:	e002      	b.n	8001af0 <LoopCopyDataInit>
 
 08001aea <CopyDataInit>:
+
+CopyDataInit:
+  ldr r4, [r2, r3]
  8001aea:	58d4      	ldr	r4, [r2, r3]
+  str r4, [r0, r3]
  8001aec:	50c4      	str	r4, [r0, r3]
+  adds r3, r3, #4
  8001aee:	3304      	adds	r3, #4
 
 08001af0 <LoopCopyDataInit>:
+
+LoopCopyDataInit:
+  adds r4, r0, r3
  8001af0:	18c4      	adds	r4, r0, r3
+  cmp r4, r1
  8001af2:	428c      	cmp	r4, r1
+  bcc CopyDataInit
  8001af4:	d3f9      	bcc.n	8001aea <CopyDataInit>
+  
+/* Zero fill the bss segment. */
+  ldr r2, =_sbss
  8001af6:	4a0b      	ldr	r2, [pc, #44]	; (8001b24 <LoopForever+0x12>)
+  ldr r4, =_ebss
  8001af8:	4c0b      	ldr	r4, [pc, #44]	; (8001b28 <LoopForever+0x16>)
+  movs r3, #0
  8001afa:	2300      	movs	r3, #0
+  b LoopFillZerobss
  8001afc:	e001      	b.n	8001b02 <LoopFillZerobss>
 
 08001afe <FillZerobss>:
+
+FillZerobss:
+  str  r3, [r2]
  8001afe:	6013      	str	r3, [r2, #0]
+  adds r2, r2, #4
  8001b00:	3204      	adds	r2, #4
 
 08001b02 <LoopFillZerobss>:
+
+LoopFillZerobss:
+  cmp r2, r4
  8001b02:	42a2      	cmp	r2, r4
+  bcc FillZerobss
  8001b04:	d3fb      	bcc.n	8001afe <FillZerobss>
+
+/* Call the clock system intitialization function.*/
+    bl  SystemInit
  8001b06:	f7ff fda9 	bl	800165c <SystemInit>
+/* Call static constructors */
+    bl __libc_init_array
  8001b0a:	f004 f97d 	bl	8005e08 <__libc_init_array>
+/* Call the application's entry point.*/
+	bl	main
  8001b0e:	f7ff fae9 	bl	80010e4 <main>
 
 08001b12 <LoopForever>:
+
+LoopForever:
+    b LoopForever
  8001b12:	e7fe      	b.n	8001b12 <LoopForever>
+  ldr   r0, =_estack
  8001b14:	20008000 	.word	0x20008000
+  ldr r0, =_sdata
  8001b18:	20000000 	.word	0x20000000
+  ldr r1, =_edata
  8001b1c:	200001d4 	.word	0x200001d4
+  ldr r2, =_sidata
  8001b20:	08007efc 	.word	0x08007efc
+  ldr r2, =_sbss
  8001b24:	200001d4 	.word	0x200001d4
+  ldr r4, =_ebss
  8001b28:	20000478 	.word	0x20000478
 
 08001b2c <ADC1_2_IRQHandler>:
+ * @retval : None
+*/
+    .section	.text.Default_Handler,"ax",%progbits
+Default_Handler:
+Infinite_Loop:
+	b	Infinite_Loop
  8001b2c:	e7fe      	b.n	8001b2c <ADC1_2_IRQHandler>
 
 08001b2e <HAL_Init>:

@@ -129,7 +129,7 @@ int main(void)
   {
 	  while(i < 15)
 	  {
-		  current_encoder_value = readEncoder(&htim2);
+		  current_encoder_value = READ_ENCODER(htim2);
 		  end_ms = HAL_GetTick();
 
 		  time_ms = end_ms - start_ms;
