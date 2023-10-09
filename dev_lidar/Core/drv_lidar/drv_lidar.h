@@ -17,16 +17,17 @@
 #include "usart.h"
 #include "tim.h"
 #include "gpio.h"
-
-#define LIDAR_START 		0xA55A
-#define LIDAR_SCAN_START 	0xA560
-#define LIDAR_SCAN_STOP 	0xA565
-#define LIDAR_RESTART 		0xA580
-#define GET_DEV_ID 			0xA590
-#define GET_HEALTH_STATUS	0XA591
+/***************************************commands**************************************/
+#define LIDAR_START 				0xA55A
+#define LIDAR_SCAN_START 			0xA560
+#define LIDAR_SCAN_STOP 			0xA565
+#define LIDAR_RESTART 				0xA580
+#define LIDAR_GET_DEV_ID 			0xA590
+#define LIDAR_GET_HEALTH_STATUS		0XA591
 
 #define COMMAND_SIZE			0x02
 #define HEADER_SIZE				0x07
+/***************************************scan size************************************/
 #define PH_SIZE					0x02
 #define	CT_SIZE					0x01
 #define LSN_SIZE				0x01
@@ -34,12 +35,17 @@
 #define	LSA_SIZE				0x02
 #define CS_SIZE					0x02
 #define Si_SIZE					0x02
+#define SCAN_RESPONSE_SIZE		(PH_SIZE + CT_SIZE + LSN_SIZE + FSA_SIZE + LSA_SIZE + CS_SIZE)
+/********************************device information size********************************/
 #define MODEL_NUMBER_SIZE		0x01
 #define FIRMWARE_VERSION_SIZE	0x02
 #define HARDWARE_VERSION_SIZE	0x01
 #define	SERIAL_NUMBER_SIZE		0x10
+#define DEVEUI_SIZE				(MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE)
+/************************************health status size********************************/
 #define STATUS_CODE_SIZE		0x01
 #define ERROR_CODE_SIZE			0x02
+#define HEALTH_STATUS_SIZE		(STATUS_CODE_SIZE + ERROR_CODE_SIZE)
 
 
 #define LIDAR_MOTOR_ENABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_SET)
@@ -71,7 +77,7 @@ typedef struct Lidar_sc{
 	uint16_t FSA; // Start Angle
 	uint16_t LSA; // Stop Angle
 	uint16_t CS; // Check code
-	uint16_t SI; // sample data
+	uint16_t SI[100]; // sample data
 }lidar_scan_t;
 
 
@@ -91,5 +97,6 @@ void LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
 void LidarGetInformation(lidar_devEUI_t *devEUI);
 void LidarScanStart(lidar_scan_t *lidscan);
+void LidarScanStop(void);
 void LidarHealthStatus(lidar_healthStatus_t *healthStatus);
 

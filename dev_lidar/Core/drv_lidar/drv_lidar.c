@@ -26,14 +26,11 @@
 
 #include "drv_lidar.h"
 
-uint8_t buf[20];
-uint8_t buf2[3];
-uint8_t trameBase = 7;
 lidar_t lidar;
 
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	HAL_StatusTypeDef status;
-	LOG_MAIN_DEBUG("transmit 0x%02X%02X", address[0], address[1]);
+	LOG_LIDAR_DEBUG("transmit 0x%02X%02X", address[0], address[1]);
 	status = HAL_UART_Transmit_DMA(&huart1, address, 2);
 	return status;
 }
@@ -66,15 +63,16 @@ void LidarSetSpeed(uint8_t speed) {
 
 void LidarGetInformation(lidar_devEUI_t *devEUI) {
 	HAL_StatusTypeDef status;
-	uint8_t command[COMMAND_SIZE] = {(GET_DEV_ID & 0xFF00) >> 8, (GET_DEV_ID & 0x00FF)};
+	uint8_t command[COMMAND_SIZE] = {(LIDAR_GET_DEV_ID & 0xFF00) >> 8, (LIDAR_GET_DEV_ID & 0x00FF)};
 	status = lidar.uart.tx(command, NULL, 0);
 	if(status != HAL_OK) {
-		LOG_MAIN_ERROR("transmit error: %d", status);
+		LOG_LIDAR_ERROR("transmit error: %d", status);
 	}
-	uint8_t *version = (uint8_t*) malloc((MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE + HEADER_SIZE) * sizeof(uint8_t));
-	status = lidar.uart.rx(NULL, version, (MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE + HEADER_SIZE));
+
+	uint8_t *version = (uint8_t*) malloc((DEVEUI_SIZE + HEADER_SIZE) * sizeof(uint8_t));
+	status = lidar.uart.rx(NULL, version, (DEVEUI_SIZE + HEADER_SIZE));
 	if(status == HAL_OK) {
-		LOG_MAIN_DEBUG("version: %b", version, (MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE + HEADER_SIZE + HEADER_SIZE));
+		LOG_LIDAR_DEBUG("version: %b", version, (DEVEUI_SIZE + HEADER_SIZE));
 		memcpy(&(devEUI->ModelNumber), &(version[HEADER_SIZE]), MODEL_NUMBER_SIZE);
 		memcpy(&(devEUI->FirmWareVersion), &(version[HEADER_SIZE+1]), FIRMWARE_VERSION_SIZE);
 		memcpy(&(devEUI->HardWareVersion), &(version[HEADER_SIZE+3]), HARDWARE_VERSION_SIZE);
@@ -86,39 +84,53 @@ void LidarGetInformation(lidar_devEUI_t *devEUI) {
 
 void LidarScanStart(lidar_scan_t *lidscan){
 	HAL_StatusTypeDef status;
-	uint8_t Startcmd[2]={0xA5,0x60};
-	status = HAL_UART_Transmit(&huart1,Startcmd,2,500);
+	uint8_t command[COMMAND_SIZE] = {(LIDAR_SCAN_START & 0xFF00) >> 8, (LIDAR_SCAN_START & 0x00FF)};
+	status = lidar.uart.tx(command, NULL, 0);
 	if(status != HAL_OK) {
-			LOG_MAIN_ERROR("transmit error: %d", status);
-		}
-	uint8_t *buf = (uint8_t*) malloc(20+7 * sizeof(uint8_t));
-		//lidar.uart.rx(NULL, buf, 20);
-		if(HAL_UART_Receive(&huart1, buf, 20+7, 500) == HAL_OK) {
-			LOG_MAIN_DEBUG("buf: %b", buf, 20+7);
-		}
-		memcpy(&(lidscan->PH), &(buf[7]), 2);
-		memcpy(&(lidscan->CT), &(buf[7+2]), 1);
-		memcpy(&(lidscan->LSN), &(buf[7+3]), 1);
-		memcpy(&(lidscan->FSA), &(buf[7+4]), 2);
-		memcpy(&(lidscan->LSA), &(buf[7+6]), 2);
-		memcpy(&(lidscan->CS), &(buf[7+8]), 2);
-		memcpy(&(lidscan->SI), &(buf[7+10]),10);
+		LOG_LIDAR_ERROR("transmit error: %d", status);
+	}
 
-		free(buf);
+	uint8_t *buf = (uint8_t*) malloc((HEADER_SIZE + SCAN_RESPONSE_SIZE + 100 * Si_SIZE) * sizeof(uint8_t));
+	lidar.uart.rx(NULL, buf, (HEADER_SIZE + SCAN_RESPONSE_SIZE + 100 * Si_SIZE));
+	if(status == HAL_OK) {
+		LOG_LIDAR_DEBUG("buf: %b", buf, (HEADER_SIZE + SCAN_RESPONSE_SIZE + 100 * Si_SIZE));
+		memcpy(&(lidscan->PH), &(buf[HEADER_SIZE]), PH_SIZE);
+		memcpy(&(lidscan->CT), &(buf[HEADER_SIZE+2]), CT_SIZE);
+		memcpy(&(lidscan->LSN), &(buf[HEADER_SIZE+3]), LSN_SIZE);
+		memcpy(&(lidscan->FSA), &(buf[HEADER_SIZE+4]), FSA_SIZE);
+		memcpy(&(lidscan->LSA), &(buf[HEADER_SIZE+6]), LSA_SIZE);
+		memcpy(&(lidscan->CS), &(buf[HEADER_SIZE+8]), CS_SIZE);
+		memcpy(&(lidscan->SI), &(buf[HEADER_SIZE+10]), Si_SIZE);
+	}
+	free(buf);
 }
+
+void LidarScanStop(void) {
+	HAL_StatusTypeDef status;
+	uint8_t command[COMMAND_SIZE] = {(LIDAR_SCAN_STOP & 0xFF00) >> 8, (LIDAR_SCAN_STOP & 0x00FF)};
+	status = lidar.uart.tx(command, NULL, 0);
+	if(status != HAL_OK) {
+		LOG_LIDAR_ERROR("transmit error: %d", status);
+	}
+}
+
 
 void LidarHealthStatus(lidar_healthStatus_t *healthStatus) {
 	HAL_StatusTypeDef status;
-	uint8_t command[2] = {0xA5, 0x91};
+	uint8_t command[COMMAND_SIZE] = {(LIDAR_GET_HEALTH_STATUS & 0xFF00) >> 8, (LIDAR_GET_HEALTH_STATUS & 0x00FF)};
+	status = lidar.uart.tx(command, NULL, 0);
 	if(status != HAL_OK) {
-		LOG_MAIN_ERROR("transmit error: %d", status);
+		LOG_LIDAR_ERROR("transmit error: %d", status);
 	}
-	uint8_t *buf2 = (uint8_t*) malloc(sizeof(buf2)+trameBase * sizeof(uint8_t));
-
-	if(HAL_UART_Receive(&huart1, buf, sizeof(buf2)+trameBase, 500) == HAL_OK) {
-		LOG_MAIN_DEBUG("buf: %b", buf, sizeof(buf2)+trameBase);
-		memcpy(&(healthStatus->StatusCode), &(buf2[trameBase]), 1);
-		memcpy(&(healthStatus->ErrorCode), &(buf2[trameBase+1]), 2);
+	uint8_t *buf = (uint8_t*) malloc((HEADER_SIZE + HEALTH_STATUS_SIZE) * sizeof(uint8_t));
+	status = lidar.uart.rx(NULL, buf,  (HEADER_SIZE + HEALTH_STATUS_SIZE));
+	if(status == HAL_OK) {
+		LOG_LIDAR_DEBUG("buf: %b", buf, (HEADER_SIZE + HEALTH_STATUS_SIZE));
+		memcpy(&(healthStatus->StatusCode), &(buf[HEADER_SIZE]), STATUS_CODE_SIZE);
+		memcpy(&(healthStatus->ErrorCode), &(buf[HEADER_SIZE + 1]), ERROR_CODE_SIZE);
 	}
-	free(buf2);
+	else {
+		LOG_LIDAR_ERROR("reception error");
+	}
+	free(buf);
 }
