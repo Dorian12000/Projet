@@ -25,13 +25,30 @@
 #define GET_DEV_ID 			0xA590
 #define GET_HEALTH_STATUS	0XA591
 
+#define COMMAND_SIZE			0x02
+#define HEADER_SIZE				0x07
+#define PH_SIZE					0x02
+#define	CT_SIZE					0x01
+#define LSN_SIZE				0x01
+#define FSA_SIZE				0x02
+#define	LSA_SIZE				0x02
+#define CS_SIZE					0x02
+#define Si_SIZE					0x02
+#define MODEL_NUMBER_SIZE		0x01
+#define FIRMWARE_VERSION_SIZE	0x02
+#define HARDWARE_VERSION_SIZE	0x01
+#define	SERIAL_NUMBER_SIZE		0x10
+#define STATUS_CODE_SIZE		0x01
+#define ERROR_CODE_SIZE			0x02
+
+
 #define LIDAR_MOTOR_ENABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_SET)
 #define LIDAR_MOTOR_DISABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_RESET)
 #define LIDAR_DEV_ENABLE()	HAL_GPIO_WritePin(DEV_EN_GPIO_Port, DEV_EN_Pin, GPIO_PIN_SET)
 #define LIDAR_DEV_DISABLE()	HAL_GPIO_WritePin(DEV_EN_GPIO_Port, DEV_EN_Pin, GPIO_PIN_RESET)
 
-typedef int (* uart_tx_t)(uint8_t address, uint8_t *p_data, uint16_t size);
-typedef int (* uart_rx_t)(uint8_t address, uint8_t *p_data, uint16_t size);
+typedef int (* uart_tx_t)(uint8_t *address, uint8_t *p_data, uint16_t size);
+typedef int (* uart_rx_t)(uint8_t *address, uint8_t *p_data, uint16_t size);
 
 typedef struct uart_s{
 	uart_tx_t tx;

@@ -33,7 +33,7 @@ lidar_t lidar;
 
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	HAL_StatusTypeDef status;
-	//LOG_MAIN_DEBUG("%02X%02X", address[0], address[1]);
+	LOG_MAIN_DEBUG("transmit 0x%02X%02X", address[0], address[1]);
 	status = HAL_UART_Transmit(&huart1, address, 2, 500);
 	//HAL_UART_Transmit(&huart1, p_data, size, HAL_MAX_DELAY);
 	return status;
@@ -41,7 +41,7 @@ static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, ui
 
 static inline HAL_StatusTypeDef LidarUartRx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	HAL_StatusTypeDef status;
-	status = HAL_UART_Receive(&huart1, p_data, size, 500);
+	status = HAL_UART_Receive_DMA(&huart1, p_data, size);
 	return status;
 }
 
@@ -67,23 +67,20 @@ void LidarSetSpeed(uint8_t speed) {
 
 void LidarGetInformation(lidar_devEUI_t *devEUI) {
 	HAL_StatusTypeDef status;
-	uint8_t command[2] = {0xA5, 0x90};
-	//status = lidar.uart.tx(command, NULL, 0);
-	status = HAL_UART_Transmit(&huart1, command, 2, 500);
-	if(status != HAL_OK) {
-		//LOG_MAIN_ERROR("transmit error: %d", status);
+	uint8_t command[COMMAND_SIZE] = {(GET_DEV_ID & 0xFF00) >> 8, (GET_DEV_ID & 0x00FF)};
+	if(lidar.uart.tx(&command, NULL, 0) != HAL_OK) {
+		LOG_MAIN_ERROR("transmit error: %d", status);
 	}
-	uint8_t *buf = (uint8_t*) malloc(20+7 * sizeof(uint8_t));
-	//lidar.uart.rx(NULL, buf, 20);
-	if(HAL_UART_Receive(&huart1, buf, 20+7, 500) == HAL_OK) {
-		//LOG_MAIN_DEBUG("buf: %b", buf, 20+7);
-		memcpy(&(devEUI->ModelNumber), &(buf[7]), 1);
-		memcpy(&(devEUI->FirmWareVersion), &(buf[7+1]), 2);
-		memcpy(&(devEUI->HardWareVersion), &(buf[7+3]), 1);
-		memcpy(&(devEUI->SerialNumber), &(buf[7+4]), 16);
+	uint8_t *version = (uint8_t*) malloc((MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE + HEADER_SIZE) * sizeof(uint8_t));
+	status = lidar.uart.rx(NULL, version, (MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE + HEADER_SIZE));
+	if(status == HAL_OK) {
+		LOG_MAIN_DEBUG("version: %b", version, (MODEL_NUMBER_SIZE + FIRMWARE_VERSION_SIZE + HARDWARE_VERSION_SIZE + SERIAL_NUMBER_SIZE + HEADER_SIZE + HEADER_SIZE));
+		memcpy(&(devEUI->ModelNumber), &(version[HEADER_SIZE]), MODEL_NUMBER_SIZE);
+		memcpy(&(devEUI->FirmWareVersion), &(version[HEADER_SIZE+1]), FIRMWARE_VERSION_SIZE);
+		memcpy(&(devEUI->HardWareVersion), &(version[HEADER_SIZE+3]), HARDWARE_VERSION_SIZE);
+		memcpy(&(devEUI->SerialNumber), &(version[HEADER_SIZE+4]), SERIAL_NUMBER_SIZE);
 	}
-
-	free(buf);
+	free(version);
 }
 
 
