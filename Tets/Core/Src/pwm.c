@@ -7,17 +7,6 @@
 
 #include "pwm.h"
 
-void initPwm(PWM *pwm)
-{
-	HAL_TIM_PWM_Start(pwm->timer, pwm->channel);
-	setPwmDutyCycle(pwm, 0.0f);
-}
-
-void stopPwm(PWM *pwm)
-{
-	HAL_TIM_PWM_Stop(pwm->timer, pwm->channel);
-}
-
 void setPwmDutyCycle(PWM *pwm, float duty_cycle)
 {
     if (duty_cycle < 0.0f)

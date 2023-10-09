@@ -18,9 +18,11 @@ typedef struct PWM_struct
 	float duty_cycle; // 0 - 1
 }PWM;
 
-void initPwm(PWM *pwm);
+#define INIT_PWM(pwm)  __HAL_TIM_SET_COMPARE((pwm).timer, (pwm).channel, 0)
+#define START_PWM(pwm) HAL_TIM_PWM_Start((pwm).timer, (pwm).channel)
+#define STOP_PWM(pwm)  HAL_TIM_PWM_Stop((pwm).timer, (pwm).channel)
+
 void setPwmDutyCycle(PWM *pwm, float duty_cycle);
-void stopPwm(PWM *pwm);
 
 
 #endif /* INC_PWM_H_ */

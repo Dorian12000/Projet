@@ -106,8 +106,8 @@ int main(void)
   // Pwm motor init
   PWM fwd = {&htim1, TIM_CHANNEL_1, 0.0};
   PWM rev = {&htim1, TIM_CHANNEL_2, 0.0};
-  initPwm(&fwd);
-  initPwm(&rev);
+  INIT_PWM(fwd);
+  INIT_PWM(rev);
 
   // Motor init
   initMotor(&motor_left, &fwd, &rev);
@@ -125,6 +125,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  START_PWM(fwd);
+
   while (1)
   {
 	  while(i < 15)
@@ -151,7 +153,7 @@ int main(void)
 			  setPwmDutyCycle(&fwd, 0.3f);
 		  }
 	  }
-	  stopPwm(&fwd);
+	  STOP_PWM(fwd);
 
     /* USER CODE END WHILE */
 

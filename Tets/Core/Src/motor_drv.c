@@ -36,7 +36,6 @@ void stopMotor(h_motor_t *motor)
 void setSpeedMotor(h_motor_t *motor, uint8_t speed)
 {
 	motor->speed = speed;
-
 }
 
 void fwdMotor(h_motor_t *motor)
@@ -64,25 +63,3 @@ void revMotor(h_motor_t *motor)
 	motor->state = REV;
 	HAL_TIM_PWM_Start(motor->rev->timer, motor->rev->channel);
 }
-
-
-//uint32_t speedMeasurement(h_motor_t *motor, uint16_t avrg_time_ms, uint16_t period_ms)
-//{
-//	uint16_t current_time_ms = 0;
-//	uint16_t count = 0;
-//	uint32_t speed = 0;
-//
-//	// Récupérer la valeur de l'encoder toutes les x ms sur un temps donné
-//	while(current_time_ms <= avrg_time_ms)
-//	{
-//		count++;
-//		speed += readEncoder(motor);
-//		current_time_ms += period_ms;
-//	}
-//
-//	// Conversions
-//	speed /= RES_ENCODER; // Nombre de tour
-//	speed = (speed * 60000) / (count * avrg_time_ms); // Tours/min
-//
-//	return speed/count;
-//}
