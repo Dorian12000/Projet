@@ -95,10 +95,12 @@ typedef struct lidar_healthStatus_s{
 }lidar_healthStatus_t;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+bool isLidarDataReady(void);
 returncode_t LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
 returncode_t LidarGetInformation(lidar_devEUI_t *devEUI);
-returncode_t LidarScanStart(lidar_scan_t *lidscan);
+returncode_t LidarScanStart(void);
 returncode_t LidarScanStop(void);
 returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus);
+returncode_t lidarDataProcess(void);
 

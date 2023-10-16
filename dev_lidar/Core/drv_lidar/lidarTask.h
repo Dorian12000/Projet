@@ -13,5 +13,14 @@
  *
  **/
 
+typedef enum {
+	LIDAR_INIT,
+	LIDAR_SCANNING,
+	LIDAR_PROCESS,
+	LIDAR_STANDBY,
+}lidarState_t;
+
+bool isLidarScanning(void);
+
 void lidarTask(void);
 void createLidarTask(void);
