@@ -66,8 +66,9 @@ void lidarTask(void) {
 			case LIDAR_SCANNING: {
 				if(xTimerIsTimerActive(lidarHandle.timer) == pdFALSE) {
 					xTimerStart(lidarHandle.timer, 0);
+					LidarScanStart();
 				}
-				if(LidarScanStart() == success) {
+				if(waitLidarScanData() == success) {
 					lidarHandle.state = LIDAR_PROCESS;
 				}
 				break;
