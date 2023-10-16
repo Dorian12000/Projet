@@ -17,6 +17,7 @@
 #include "usart.h"
 #include "tim.h"
 #include "gpio.h"
+#include "log/types.h"
 /***************************************commands**************************************/
 #define LIDAR_START 				0xA55A
 #define LIDAR_SCAN_START 			0xA560
@@ -93,10 +94,11 @@ typedef struct lidar_healthStatus_s{
 	uint8_t ErrorCode;
 }lidar_healthStatus_t;
 
-void LidarInit(void);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+returncode_t LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
-void LidarGetInformation(lidar_devEUI_t *devEUI);
-void LidarScanStart(lidar_scan_t *lidscan);
-void LidarScanStop(void);
-void LidarHealthStatus(lidar_healthStatus_t *healthStatus);
+returncode_t LidarGetInformation(lidar_devEUI_t *devEUI);
+returncode_t LidarScanStart(lidar_scan_t *lidscan);
+returncode_t LidarScanStop(void);
+returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus);
 
