@@ -153,21 +153,25 @@ returncode_t LidarScanStart(void){
 }
 
 returncode_t waitLidarScanData(void) {
-	xSemaphoreTake(sem_uart_read, portMAX_DELAY);	// Wait for DMA Notification
-	//LOG_LIDAR_DEBUG("lidarScanRawData: %b", lidarScanRawData, (HEADER_SIZE + SCAN_RESPONSE_SIZE + 100 * Si_SIZE));
-	if(strncmp(lidarScanRawData, (uint8_t[]){0xA5, 0x5A}, 2) == 0) {
-		memcpy(lidarScanData.PH, &(lidarScanRawData[HEADER_SIZE]), PH_SIZE);
-		memcpy(lidarScanData.CT, &(lidarScanRawData[HEADER_SIZE+2]), CT_SIZE);
-		memcpy(lidarScanData.LSN, &(lidarScanRawData[HEADER_SIZE+3]), LSN_SIZE);
-		memcpy(lidarScanData.FSA, &(lidarScanRawData[HEADER_SIZE+4]), FSA_SIZE);
-		memcpy(lidarScanData.LSA, &(lidarScanRawData[HEADER_SIZE+6]), LSA_SIZE);
-		memcpy(lidarScanData.CS, &(lidarScanRawData[HEADER_SIZE+8]), CS_SIZE);
-		memcpy(lidarScanData.SI, &(lidarScanRawData[HEADER_SIZE+10]), Si_SIZE * 50);
-		return success;
+	if(xSemaphoreTake(sem_uart_read, portMAX_DELAY) == pdTRUE) {	// Wait for DMA Notification
+		//LOG_LIDAR_DEBUG("lidarScanRawData: %b", lidarScanRawData, (HEADER_SIZE + SCAN_RESPONSE_SIZE + 100 * Si_SIZE));
+		if(strncmp(lidarScanRawData, (uint8_t[]){0xA5, 0x5A}, 2) == 0) {
+			memcpy(lidarScanData.PH, &(lidarScanRawData[HEADER_SIZE]), PH_SIZE);
+			memcpy(lidarScanData.CT, &(lidarScanRawData[HEADER_SIZE+2]), CT_SIZE);
+			memcpy(lidarScanData.LSN, &(lidarScanRawData[HEADER_SIZE+3]), LSN_SIZE);
+			memcpy(lidarScanData.FSA, &(lidarScanRawData[HEADER_SIZE+4]), FSA_SIZE);
+			memcpy(lidarScanData.LSA, &(lidarScanRawData[HEADER_SIZE+6]), LSA_SIZE);
+			memcpy(lidarScanData.CS, &(lidarScanRawData[HEADER_SIZE+8]), CS_SIZE);
+			memcpy(lidarScanData.SI, &(lidarScanRawData[HEADER_SIZE+10]), Si_SIZE * 50);
+			return success;
+		}
+		else {
+			LOG_LIDAR_ERROR("Header error %b", lidarScanRawData, 2);
+			return wrongparameter;
+		}
 	}
 	else {
-		LOG_LIDAR_ERROR("Header error %b", lidarScanRawData, 2);
-		return wrongparameter;
+		return transmission_no_response;
 	}
 }
 returncode_t LidarScanStop(void) {
