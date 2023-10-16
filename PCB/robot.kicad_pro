@@ -55,7 +55,15 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "lib_footprint_issues|82025000|61305000|5ef80341-352d-41f7-aea8-4f080047c79a|00000000-0000-0000-0000-000000000000",
+        "silk_edge_clearance|72940000|121985000|11b9f687-3078-4313-94e6-77480264d26f|5057abbd-75b6-49e0-b08b-d6aa99e3a4fd",
+        "silk_edge_clearance|72940000|121985000|11b9f687-3078-4313-94e6-77480264d26f|99243507-bf07-4699-ba8c-468e8f8178f8",
+        "silk_edge_clearance|83060000|121985000|11b9f687-3078-4313-94e6-77480264d26f|7e5ac772-3d06-4a5a-88a9-094b6bd07bf6",
+        "starved_thermal|66497500|82845000|1ff898bb-896f-42dc-9df6-244c1b4bcfa9|66b64b8c-51aa-4c65-a0b7-b7e03484d255|F.Cu",
+        "starved_thermal|83000000|62232500|1ff898bb-896f-42dc-9df6-244c1b4bcfa9|8b1e1536-cab7-40df-93c1-7e957e14cfa0|F.Cu",
+        "starved_thermal|94862500|62000000|1ff898bb-896f-42dc-9df6-244c1b4bcfa9|d84476f7-16ca-470d-b961-894d12bf0a83|F.Cu"
+      ],
       "meta": {
         "version": 2
       },
@@ -95,9 +103,9 @@
         "silk_over_copper": "warning",
         "silk_overlap": "warning",
         "skew_out_of_range": "error",
-        "solder_mask_bridge": "error",
+        "solder_mask_bridge": "ignore",
         "starved_thermal": "error",
-        "text_height": "warning",
+        "text_height": "ignore",
         "text_thickness": "warning",
         "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
@@ -111,7 +119,7 @@
       },
       "rules": {
         "max_error": 0.005,
-        "min_clearance": 0.0,
+        "min_clearance": 0.15,
         "min_connection": 0.0,
         "min_copper_edge_clearance": 0.0,
         "min_hole_clearance": 0.25,
@@ -177,6 +185,7 @@
         0.5,
         0.8,
         1.0,
+        1.5,
         2.0
       ],
       "via_dimensions": [
@@ -417,7 +426,7 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.2,
+        "clearance": 0.15,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
