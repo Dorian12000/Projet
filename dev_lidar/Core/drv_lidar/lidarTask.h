@@ -13,6 +13,8 @@
  *
  **/
 
+#ifndef INC_LIDAR_TASK_H__
+#define INC_LIDAR_TASK_H__
 typedef enum {
 	LIDAR_INIT,
 	LIDAR_SCANNING,
@@ -24,3 +26,5 @@ bool isLidarScanning(void);
 
 void lidarTask(void);
 void createLidarTask(void);
+
+#endif

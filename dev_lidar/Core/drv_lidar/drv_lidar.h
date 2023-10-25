@@ -13,6 +13,9 @@
  *
  **/
 
+#ifndef INC_DRV_LIDAR_H__
+#define INC_DRV_LIDAR_H__
+
 #include "main.h"
 #include "usart.h"
 #include "tim.h"
@@ -105,3 +108,4 @@ returncode_t LidarScanStop(void);
 returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus);
 returncode_t lidarDataProcess(void);
 
+#endif
