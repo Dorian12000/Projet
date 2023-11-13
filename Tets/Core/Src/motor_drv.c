@@ -6,6 +6,7 @@
  */
 
 #include "motor_drv.h"
+#include <stdio.h>
 
 h_motor_t motor_left;
 h_motor_t motor_right;
@@ -23,11 +24,11 @@ void stopMotor(h_motor_t *motor)
 	// Stop la PWM correspondant au sens de rotation
 	if(motor->state == REV)
 	{
-		HAL_TIM_PWM_Stop(motor->rev->timer, motor->rev->channel);
+		STOP_PWM(*motor->rev);
 	}
 	else if(motor->state == FWD)
 	{
-		HAL_TIM_PWM_Stop(motor->fwd->timer, motor->fwd->channel);
+		STOP_PWM(*motor->fwd);
 	}
 	motor->speed = 0;
 	motor->state = STOP;
@@ -35,31 +36,81 @@ void stopMotor(h_motor_t *motor)
 
 void setSpeedMotor(h_motor_t *motor, uint8_t speed)
 {
+
+
 	motor->speed = speed;
 }
 
-void fwdMotor(h_motor_t *motor)
+void forwardMotor(h_motor_t *motor, uint8_t speed)
 {
-	// Vérifie si le moteur ne tourne pas déjà dans l'autre sens et stop la PWM
+	// Check speed
+	if(speed > MAX_SPEED)
+	{
+		speed = MAX_SPEED;
+	}
+	else if(speed < MIN_SPEED)
+	{
+		speed = MIN_SPEED;
+	}
+
+	// Check direction
 	if(motor->state == REV)
 	{
-		HAL_TIM_PWM_Stop(motor->rev->timer, motor->rev->channel);
+		STOP_PWM(*motor->rev);
+		motor->state = FWD;
+		if(START_PWM(*motor->fwd) != HAL_OK)
+		{
+			printf("Error start fwd pwm\r\n");
+			Error_Handler();
+		}
+	}
+	else if(motor->state == STOP)
+	{
+		motor->state = FWD;
+		if(START_PWM(*motor->fwd) != HAL_OK)
+		{
+			printf("Error start fwd pwm\r\n");
+			Error_Handler();
+		}
 	}
 
-	// Génération de la PWM pour aller en avant
-	motor->state = FWD;
-	HAL_TIM_PWM_Start(motor->fwd->timer, motor->fwd->channel);
+	motor->speed = speed;
+	setPwmDutyCycle(motor->fwd, speed);
 }
 
-void revMotor(h_motor_t *motor)
+void reverseMotor(h_motor_t *motor, uint8_t speed)
 {
-	// Vérifie si le moteur ne tourne pas déjà dans l'autre sens et stop la PWM
-	if(motor->state == FWD)
+	// Check speed
+	if(speed > MAX_SPEED)
 	{
-		HAL_TIM_PWM_Stop(motor->fwd->timer, motor->fwd->channel);
+		speed = MAX_SPEED;
+	}
+	else if(speed < MIN_SPEED)
+	{
+		speed = MIN_SPEED;
 	}
 
-	// Génération de la PWM pour aller en arrière
-	motor->state = REV;
-	HAL_TIM_PWM_Start(motor->rev->timer, motor->rev->channel);
+	// Check direction
+	if(motor->state == FWD)
+	{
+		STOP_PWM(*motor->fwd);
+		motor->state = REV;
+		if(START_PWM(*motor->rev) != HAL_OK)
+		{
+			printf("Error start rev pwm\r\n");
+			Error_Handler();
+		}
+	}
+	else if(motor->state == STOP)
+	{
+		motor->state = REV;
+		if(START_PWM(*motor->rev) != HAL_OK)
+		{
+			printf("Error start rev pwm\r\n");
+			Error_Handler();
+		}
+	}
+
+	motor->speed = speed;
+	setPwmDutyCycle(motor->rev, speed);
 }

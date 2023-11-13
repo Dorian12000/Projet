@@ -1,5 +1,5 @@
-../Core/Src/motor_drv.c:13:6:initMotor	1
-../Core/Src/motor_drv.c:21:6:stopMotor	3
-../Core/Src/motor_drv.c:36:6:setSpeedMotor	1
-../Core/Src/motor_drv.c:42:6:fwdMotor	2
-../Core/Src/motor_drv.c:55:6:revMotor	2
+../Core/Src/motor_drv.c:14:6:initMotor	1
+../Core/Src/motor_drv.c:22:6:stopMotor	3
+../Core/Src/motor_drv.c:37:6:setSpeedMotor	1
+../Core/Src/motor_drv.c:44:6:forwardMotor	6
+../Core/Src/motor_drv.c:81:6:reverseMotor	6

@@ -28,6 +28,9 @@
 #include "motor_drv.h"
 #include "encoder.h"
 #include "pwm.h"
+#include "shell.h"
+#include "pid.h"
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,12 +46,17 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+#define FE 100
+#define TE 0.01
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+  uint32_t last_encoder_value = 0;
+  uint32_t current_encoder_value = 0;
+  float inputs_pid[3] = {0};
+  float outputs_pid[3] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,6 +72,42 @@ int __io_putchar(int chr)
 	HAL_UART_Transmit(&hlpuart1, (uint8_t*)&chr, 1, HAL_MAX_DELAY);
 	return chr;
 }
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim->Instance == TIM3)
+	{
+		// Lecture encoder
+		current_encoder_value = READ_ENCODER(htim2);
+		//printf("Current encoder value = %ld\r\n", current_encoder_value);
+
+		// Distance entre les deux valeurs d'encoder (en tour)
+		float distance = (current_encoder_value - last_encoder_value) / RES_ENCODER;
+		//printf("Distance = %f\r\n", distance);
+
+		// Conversion en vitesse (tour par minute)
+		float rpm = 60.0 * distance / TE ;
+		//printf("Vitesse en tour par minute = %f\r\n", rpm);
+
+		// Conversion de la vitesse entre 0 et 100
+		float speed = 100.0 * rpm / (float)MAX_RPM;
+		//printf("Vitesse (0-100) = %f\r\n", speed);
+
+		// Erreur entre la consigne et la mesure
+		error(&pid_motor_left, inputs_pid, motor_left.speed, speed);
+
+		// Corection
+		correcteur(&pid_motor_left, inputs_pid, outputs_pid);
+
+		if(outputs_pid[pid_motor_left.index] != 0)
+		{
+			printf("%f\r\n", fabs(outputs_pid[pid_motor_left.index]));
+			//forwardMotor(&motor_left, outputs_pid[pid_motor_left.index]);
+		}
+		last_encoder_value = current_encoder_value;
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -97,63 +141,70 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim1);
-  HAL_TIM_Base_Start(&htim2);
-
-  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  if(HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL) != HAL_OK) // Encodeur
+  {
+	  printf("Error start timer encoder\r\n");
+	  Error_Handler();
+  }
+  if(HAL_TIM_Base_Start_IT(&htim3) != HAL_OK) // Interruption asservissement moteur
+  {
+	  printf("Error start timer 3\r\n");
+	  Error_Handler();
+  }
 
   // Pwm motor init
   PWM fwd = {&htim1, TIM_CHANNEL_1, 0.0};
   PWM rev = {&htim1, TIM_CHANNEL_2, 0.0};
-  INIT_PWM(fwd);
-  INIT_PWM(rev);
 
   // Motor init
   initMotor(&motor_left, &fwd, &rev);
 
-  // Start Pwm
-  setPwmDutyCycle(&fwd, 0.2f);
+  // PID init
+  initPID(&pid_motor_left, 0.0, 0.0, 0.0, TE);
 
-  int i = 0;
-  uint32_t prev_encoder_value = readEncoder(&htim2);
-  uint32_t current_encoder_value;
-  uint32_t start_ms = HAL_GetTick();
-  uint32_t end_ms;
-  uint32_t time_ms;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  START_PWM(fwd);
+  forwardMotor(&motor_left, 15);
+  HAL_Delay(10000);
+  //stopMotor(&motor_left);
+  //HAL_TIM_Base_Stop_IT(&htim3);
+//  START_PWM(*motor_left.fwd);
+//  setPwmDutyCycle(motor_left.fwd, 0);
+
 
   while (1)
   {
-	  while(i < 15)
-	  {
-		  current_encoder_value = READ_ENCODER(htim2);
-		  end_ms = HAL_GetTick();
 
-		  time_ms = end_ms - start_ms;
-
-		  printf("i = %d\n\r", i);
-		  printf("%ld\n\r", end_ms);
-		  printf("Time = %ld\r\n", time_ms);
-		  printf("Encoder = %ld\r\n", current_encoder_value);
-		  printf("Speed = %f\r\n", convertEncoderToSpeed(prev_encoder_value, current_encoder_value, time_ms));
-		  printf("\n\n");
-		  prev_encoder_value = current_encoder_value;
-		  start_ms = end_ms;
-
-		  HAL_Delay(1000);
-		  i++;
-
-		  if(i == 7)
-		  {
-			  setPwmDutyCycle(&fwd, 0.3f);
-		  }
-	  }
-	  STOP_PWM(fwd);
+//	  while(i < 15)
+//	  {
+//		  current_encoder_value = READ_ENCODER(htim2);
+//		  end_ms = HAL_GetTick();
+//
+//		  time_ms = end_ms - start_ms;
+//
+//		  printf("i = %d\n\r", i);
+//		  printf("%ld\n\r", end_ms);
+//		  printf("Time = %ld\r\n", time_ms);
+//		  printf("Encoder = %ld\r\n", current_encoder_value);
+//		  printf("Speed = %f\r\n", convertEncoderToSpeed(prev_encoder_value, current_encoder_value, time_ms));
+//		  printf("\n\n");
+//		  prev_encoder_value = current_encoder_value;
+//		  start_ms = end_ms;
+//
+//		  HAL_Delay(1000);
+//		  i++;
+//
+//		  if(i == 7)
+//		  {
+//			  setPwmDutyCycle(&fwd, 0.3f);
+//		  }
+//	  }
+//	  STOP_PWM(fwd);
 
     /* USER CODE END WHILE */
 

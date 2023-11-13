@@ -12,6 +12,13 @@
 #include <stdint.h>
 #include "tim.h"
 
+#define MAX_RPM 300
+#define MAX_SPEED 100
+#define MIN_SPEED 0
+#define RES_ENCODER 224.4 // Impulsions de l'encoder pour 1 tour
+
+#define READ_ENCODER(enc_timer) (enc_timer).Instance->CNT
+
 typedef enum h_motor_state
 {
 	FWD,
@@ -42,8 +49,8 @@ void initMotor(h_motor_t *motor, PWM *fwd, PWM *rev);
 
 void stopMotor(h_motor_t *motor);
 void setSpeedMotor(h_motor_t *motor, uint8_t speed);
-void fwdMotor(h_motor_t *motor);
-void revMotor(h_motor_t *motor);
+void forwardMotor(h_motor_t *motor, uint8_t speed);
+void reverseMotor(h_motor_t *motor, uint8_t speed);
 
 uint32_t speedMeasurement(h_motor_t *motor, uint16_t avrg_time_ms, uint16_t period_ms);
 

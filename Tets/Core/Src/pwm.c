@@ -6,20 +6,21 @@
  */
 
 #include "pwm.h"
+#include <stdio.h>
 
-void setPwmDutyCycle(PWM *pwm, float duty_cycle)
+// duty_cycle entre 0 et 100
+void setPwmDutyCycle(PWM *pwm, uint8_t duty_cycle)
 {
-    if (duty_cycle < 0.0f)
+	uint16_t duty_cycle16 = duty_cycle * MAX_DUTY_CYCLE_MOTOR / 100;
+    if (duty_cycle16 < MIN_DUTY_CYCLE_MOTOR)
     {
-        duty_cycle = 0.0f;
+    	duty_cycle16 = MIN_DUTY_CYCLE_MOTOR;
     }
-    else if (duty_cycle > 1.0f)
+    else if (duty_cycle16 > MAX_DUTY_CYCLE_MOTOR)
     {
-        duty_cycle = 1.0f;
+    	duty_cycle16 = MAX_DUTY_CYCLE_MOTOR;
     }
 
-    uint16_t period = pwm->timer->Init.Period;
-    uint16_t ccr_value = (uint16_t)(duty_cycle * period);
-
-    __HAL_TIM_SET_COMPARE(pwm->timer, pwm->channel, ccr_value);
+    printf("duty cycle = %d\r\n", duty_cycle16);
+    __HAL_TIM_SET_COMPARE(pwm->timer, pwm->channel, duty_cycle16);
 }

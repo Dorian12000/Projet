@@ -16,7 +16,6 @@
 // Macros
 #define READ_ENCODER(enc_timer) (enc_timer).Instance->CNT
 
-uint32_t readEncoder(TIM_HandleTypeDef *enc_timer);
 float convertEncoderToSpeed(uint32_t enc_prev, uint32_t enc_curr, uint16_t time_ms);
 float convertEncoderToPosition(uint32_t enc_prev, uint32_t enc_curr);
 

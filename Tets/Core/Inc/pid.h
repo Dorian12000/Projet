@@ -19,8 +19,11 @@ typedef struct PID_struct
 	uint8_t ordre;
 }PID;
 
+extern PID pid_motor_left;
+extern PID pid_motor_right;
+
 void initPID(PID *pid, float kp, float ki, float kd, float Te);
-void error(PID *pid, float *inputs, float speed, float spead_mes);
+void error(PID *pid, float *inputs, uint8_t speed, float speed_mes);
 void correcteur(PID *pid, float *inputs, float *outputs);
 
 #endif /* INC_PID_H_ */

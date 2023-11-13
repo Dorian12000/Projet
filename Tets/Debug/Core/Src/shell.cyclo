@@ -1,0 +1,3 @@
+../Core/Src/shell.c:40:6:Shell_Init	1
+../Core/Src/shell.c:51:6:Shell_Loop	9
+../Core/Src/shell.c:99:6:HAL_UART_RxCpltCallback	1

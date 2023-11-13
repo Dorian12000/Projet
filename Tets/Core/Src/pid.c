@@ -6,6 +6,10 @@
  */
 
 #include "pid.h"
+#include <stdio.h>
+
+PID pid_motor_left;
+PID pid_motor_right;
 
 void initPID(PID *pid, float kp, float ki, float kd, float Te)
 {
@@ -18,9 +22,10 @@ void initPID(PID *pid, float kp, float ki, float kd, float Te)
 	pid->ordre = 3;
 }
 
-void error(PID *pid, float *inputs, float speed, float speed_mes)
+void error(PID *pid, float *inputs, uint8_t speed, float speed_mes)
 {
-	inputs[pid->index] = speed - speed_mes;
+	inputs[pid->index] = speed_mes - speed;
+	//printf("Erreur = %f\r\n", inputs[pid->index]);
 }
 
 void correcteur(PID *pid, float *inputs, float *outputs)
@@ -29,10 +34,11 @@ void correcteur(PID *pid, float *inputs, float *outputs)
 	uint8_t idx = pid->index;
 
 	outputs[idx] = outputs[(idx + 2)%ordre]
-				   + pid->b0*inputs[idx]
-				   + pid->b1*inputs[(idx + 1)%ordre]
-				   + pid->b2*inputs[(idx + 2)%ordre];
+				   + pid->b0*inputs[idx];
+//				   + pid->b1*inputs[(idx + 1)%ordre]
+//				   + pid->b2*inputs[(idx + 2)%ordre];
 
+	//printf("Sortie pid = %f\r\n", outputs[idx]);
 	pid->index = (idx + 1) % ordre;
 }
 
