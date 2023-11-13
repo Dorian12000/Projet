@@ -33,11 +33,37 @@ typedef struct {
 TaskHandle_t h_task_lidar = NULL;
 static lidarHandle_t lidarHandle;
 
+/**
+ * @brief Check if the Lidar is currently in scanning mode.
+ *
+ * This function returns a boolean indicating whether the Lidar is currently in the scanning state.
+ *
+ * @return
+ *   - \c true: Lidar is in scanning mode.
+ *   - \c false: Lidar is not in scanning mode.
+ */
 bool isLidarScanning(void) {
 	return (lidarHandle.state == LIDAR_SCANNING);
 }
 
-void lidarTask(void) {
+/**
+ * @brief Lidar task function.
+ *
+ * This function implements the main functionality of the Lidar task.
+ * It handles the initialization, scanning, data processing, and standby states of the Lidar device.
+ *
+ * The function uses a state machine to manage the different states of the Lidar task.
+ * States:
+ * - LIDAR_INIT: Initializes the Lidar device and transitions to LIDAR_SCANNING on success.
+ * - LIDAR_SCANNING: Starts Lidar scanning and performs data processing. Transitions to LIDAR_PROCESS.
+ * - LIDAR_PROCESS: Placeholder state for future processing if needed.
+ * - LIDAR_STANDBY: Placeholder state for standby mode if needed.
+ *
+ * @note The task runs indefinitely in a loop, continuously monitoring and managing the Lidar device state.
+ *
+ * @return None.
+ */
+TaskFunction_t lidarTask(void) {
 	lidar_devEUI_t devEUI;
 	lidar_scan_t lidarSc;
 
@@ -68,13 +94,11 @@ void lidarTask(void) {
 					xTimerStart(lidarHandle.timer, 0);
 					LidarScanStart();
 				}
-				if(waitLidarScanData() == success) {
-					lidarHandle.state = LIDAR_PROCESS;
-				}
-				break;
+				lidarDataProcess();
+				osDelay(1000);
 			}
 			case LIDAR_PROCESS: {
-				lidarDataProcess();
+				
 				lidarHandle.state = LIDAR_SCANNING;
 				break;
 			}
@@ -94,11 +118,25 @@ void lidarTask(void) {
 	}
 }
 
+/**
+ * @brief Creates a task for the Lidar functionality.
+ *
+ * This function creates a FreeRTOS task named "Lidar" using xTaskCreate.
+ * The task is created with the lidarTask function as its entry point.
+ *
+ * @note The task is created with specified stack depth and priority.
+ * If the task creation fails, an error message is logged using LOG_LIDAR_ERROR.
+ * If successful, a debug message is logged using LOG_LIDAR_DEBUG.
+ *
+ * @see lidarTask
+ *
+ * @return None.
+ */
 void createLidarTask(void) {
 	if (xTaskCreate(lidarTask, "Lidar", TASK_LIDAR_STACK_DEPTH, NULL, TASK_LIDAR_PRIORITY, &h_task_lidar) != pdPASS) {
 		LOG_LIDAR_ERROR("Error creating task lidar\r\n");
 	}
 	else {
-		LOG_LIDAR_INFO(COLOR_GREEN"Lidar task create");
+		LOG_LIDAR_DEBUG(COLOR_GREEN"Lidar task create");
 	}
 }

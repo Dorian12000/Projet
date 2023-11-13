@@ -13,8 +13,8 @@
  *
  **/
 
-#ifndef INC_LIDAR_TASK_H__
-#define INC_LIDAR_TASK_H__
+#include "cmsis_os.h"
+
 typedef enum {
 	LIDAR_INIT,
 	LIDAR_SCANNING,
@@ -24,7 +24,5 @@ typedef enum {
 
 bool isLidarScanning(void);
 
-void lidarTask(void);
+TaskFunction_t lidarTask(void);
 void createLidarTask(void);
-
-#endif

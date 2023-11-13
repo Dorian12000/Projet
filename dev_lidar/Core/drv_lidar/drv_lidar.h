@@ -13,9 +13,6 @@
  *
  **/
 
-#ifndef INC_DRV_LIDAR_H__
-#define INC_DRV_LIDAR_H__
-
 #include "main.h"
 #include "usart.h"
 #include "tim.h"
@@ -75,13 +72,13 @@ typedef struct lidar_s{
 
 
 typedef struct Lidar_sc{
-	uint16_t PH; // PACKET HEADER
+	uint8_t PH[2]; // PACKET HEADER
 	uint8_t CT; //Package Type
 	uint8_t LSN; // Sample quantity
-	uint16_t FSA; // Start Angle
-	uint16_t LSA; // Stop Angle
-	uint16_t CS; // Check code
-	uint16_t SI[100]; // sample data
+	uint8_t FSA[2]; // Start Angle
+	uint8_t LSA[2]; // Stop Angle
+	uint8_t CS[2]; // Check code
+	uint8_t SI[100*2]; // sample data
 }lidar_scan_t;
 
 
@@ -98,14 +95,12 @@ typedef struct lidar_healthStatus_s{
 }lidar_healthStatus_t;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
-
+bool isLidarDataReady(void);
 returncode_t LidarInit(void);
 void LidarSetSpeed(uint8_t speed);
 returncode_t LidarGetInformation(lidar_devEUI_t *devEUI);
 returncode_t LidarScanStart(void);
-returncode_t waitLidarScanData(void);
 returncode_t LidarScanStop(void);
 returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus);
 returncode_t lidarDataProcess(void);
 
-#endif
