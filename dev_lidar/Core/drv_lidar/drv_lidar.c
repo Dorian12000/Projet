@@ -22,12 +22,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "log/logger.h"
 #include "log/types.h"
 
 #include "lidarTask.h"
 #include "drv_lidar.h"
+
+#define RAYON 0.0637 //rayon du lidar en m
 
 static lidar_t lidar;
 static SemaphoreHandle_t sem_uart_read = NULL;
@@ -65,10 +68,41 @@ static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, ui
 	return status;
 }
 
+/**
+ * @brief Receive data through UART for Lidar communication.
+ *
+ * This function uses Direct Memory Access (DMA) to receive data through UART.
+ *
+ * @param[in] address Pointer to the destination address.
+ * @param[out] p_data Pointer to the buffer where received data will be stored.
+ * @param[in] size Size of the data to be received.
+ *
+ * @return
+ *   - #HAL_OK: Reception was successful.
+ *   - #HAL_ERROR: An error occurred during reception.
+ *
+ * @note This function is specific to the UART communication for Lidar devices.
+ * It uses DMA for efficient and non-blocking data reception.
+ */
 static inline HAL_StatusTypeDef LidarUartRx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	return HAL_UART_Receive_DMA(&huart1, p_data, size);
 }
 
+/**
+ * @brief Initialize the Lidar device.
+ *
+ * This function initializes the Lidar device, configuring UART communication,
+ * creating a semaphore for UART read synchronization, enabling the Lidar device and motor,
+ * and setting the Lidar speed to 0.
+ *
+ * @return
+ *   - #success: Lidar initialization was successful.
+ *   - #memoryfail: Failed to create a semaphore for UART read synchronization.
+ *
+ * @note This function sets up the necessary configurations for the Lidar device to operate.
+ * It also creates a semaphore for synchronization during UART reads and enables the Lidar device and motor.
+ * The Lidar speed is set to 0 during initialization.
+ */
 returncode_t LidarInit(void) {
 	returncode_t ret = success;
 	lidar.uart.tx = LidarUarTx;
@@ -99,6 +133,23 @@ void LidarSetSpeed(uint8_t speed) {
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1 ,speed);
 }
 
+/**
+ * @brief Get information from the Lidar device.
+ *
+ * This function sends a command to the Lidar device to retrieve device information,
+ * including model number, firmware version, hardware version, and serial number.
+ *
+ * @param[out] devEUI Pointer to a structure where the Lidar device information will be stored.
+ *
+ * @return
+ *   - #success: Lidar information retrieval was successful.
+ *   - #mallocfail: Failed to allocate memory for data reception.
+ *   - #transmission_failed: Failed to transmit or receive data.
+ *   - #wrongparameter: Received data has an unexpected header or format.
+ *
+ * @note This function uses UART communication with DMA for efficient data transmission and reception.
+ * It checks the header of the received data to ensure it matches the expected format before extracting device information.
+ */
 returncode_t LidarGetInformation(lidar_devEUI_t *devEUI) {
 	LOG_LIDAR_ENTER();
 	HAL_StatusTypeDef status;
@@ -138,7 +189,17 @@ returncode_t LidarGetInformation(lidar_devEUI_t *devEUI) {
 	return success;
 }
 
-
+/**
+ * @brief Start a Lidar scanning process.
+ *
+ * This function sends a command to the Lidar device to initiate the scanning process.
+ *
+ * @return
+ *   - #success: Lidar scanning process was successfully initiated.
+ *   - #transmission_failed: Failed to transmit the scanning command.
+ *
+ * @note This function uses UART communication with DMA for efficient data transmission.
+ */
 returncode_t LidarScanStart(void){
 	LOG_LIDAR_ENTER();
 	HAL_StatusTypeDef status;
@@ -152,6 +213,17 @@ returncode_t LidarScanStart(void){
 	return success;
 }
 
+/**
+ * @brief Stop the Lidar scanning process.
+ *
+ * This function sends a command to the Lidar device to stop the scanning process.
+ *
+ * @return
+ *   - #success: Lidar scanning process was successfully stopped.
+ *   - #transmission_failed: Failed to transmit the command to stop scanning.
+ *
+ * @note This function uses UART communication with DMA for efficient data transmission.
+ */
 returncode_t LidarScanStop(void) {
 	LOG_LIDAR_ENTER();
 	HAL_StatusTypeDef status;
@@ -164,7 +236,23 @@ returncode_t LidarScanStop(void) {
 	return success;
 }
 
-
+/**
+ * @brief Get the health status of the Lidar device.
+ *
+ * This function sends a command to the Lidar device to retrieve its health status,
+ * including the status code and error code.
+ *
+ * @param[out] healthStatus Pointer to a structure where the Lidar health status will be stored.
+ *
+ * @return
+ *   - #success: Lidar health status retrieval was successful.
+ *   - #mallocfail: Failed to allocate memory for data reception.
+ *   - #transmission_failed: Failed to transmit or receive data.
+ *   - #wrongparameter: Received data has an unexpected header or format.
+ *
+ * @note This function uses UART communication with DMA for efficient data transmission and reception.
+ * It checks the header of the received data to ensure it matches the expected format before extracting health status information.
+ */
 returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus) {
 	LOG_LIDAR_ENTER();
 	HAL_StatusTypeDef status;
@@ -218,6 +306,39 @@ returncode_t calculateOptimalDirection(void) {
 
     return optimalPosition;
 }*/
+
+int16_t *whereIsNearestRobot(void) {
+	int16_t robotPosition[2] = {0, 0}; // {distance, angle}
+	//TODO convert distance
+	//TODO for boucle
+
+	/*check if 5 samples form an arc of a circle*/
+	double expectedDistance = calculateExpectedDistance(convertedDistance[n], offsetAngle);
+	if((convertedDistance[n+1] < expectedDistance + 0.3) && (convertedDistance[n+1] > expectedDistance - 0.3) && (convertedDistance[n-1] < expectedDistance + 0.3) && (convertedDistance[n-1] > expectedDistance - 0.3)) {
+		expectedDistance = calculateExpectedDistance(convertedDistance[n], 2*offsetAngle);
+		if((convertedDistance[n+2] < expectedDistance + 0.3) && (convertedDistance[n+2] > expectedDistance - 0.3) && (convertedDistance[n-2] < expectedDistance + 0.3) && (convertedDistance[n-2] > expectedDistance - 0.3)) {
+			if(!robotPosition[0]) { // first robot detected
+				robotPosition[0] = convertedDistance[n];
+				robotPosition[1] = n;
+			}
+			else if(robotPosition[0] > convertedDistance[n]) { // a robot is closer than previous
+				robotPosition[0] = convertedDistance[n];
+				robotPosition[1] = n;
+			}
+		}
+	}
+	// end for
+	return robotPosition;
+
+}
+
+double calculateExpectedDistance(double distanceInitiale, double angleDecalage) {
+    double angleEnRadians = angleDecalage * M_PI / 180.0; // Conversion de l'angle en radians, car les fonctions trigonométriques en C utilisent des radians
+    double nouvelleDistance = sqrt(pow(distanceInitiale, 2) + pow(RAYON, 2) - 
+								2 * distanceInitiale * RAYON * cos(angleEnRadians));// Calcul de la distance à laquelle devrait etre le prochain point pour etre un robot
+																					// en utilisant le théorème des cosinus
+	return nouvelleDistance;
+}
 
 returncode_t lidarDataProcess(void) {
 	HAL_StatusTypeDef status;
