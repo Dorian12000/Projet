@@ -55,19 +55,22 @@
 #define LIDAR_DEV_DISABLE()	HAL_GPIO_WritePin(DEV_EN_GPIO_Port, DEV_EN_Pin, GPIO_PIN_RESET)
 
 typedef int (* uart_tx_t)(uint8_t *address, uint8_t *p_data, uint16_t size);
-typedef int (* uart_rx_t)(uint8_t *address, uint8_t *p_data, uint16_t size);
+typedef int (* uart_rx_t)(uint8_t *p_data, uint16_t size);
 
 typedef struct uart_s{
 	uart_tx_t tx;
 	uart_rx_t rx;
 }uart_t;
 
+typedef struct position_s{
+	uint8_t angle;
+	uint16_t distance;
+}position_t;
+
+
 typedef struct lidar_s{
 	uart_t uart;
-	uint8_t SampleQuantity;
-	uint16_t StartAngle;
-	uint16_t StopAngle;
-	uint16_t CS; // check code
+	position_t *position;
 }lidar_t;
 
 
@@ -78,7 +81,7 @@ typedef struct Lidar_sc{
 	uint8_t FSA[2]; // Start Angle
 	uint8_t LSA[2]; // Stop Angle
 	uint8_t CS[2]; // Check code
-	uint8_t SI[100*2]; // sample data
+	uint8_t *SI; // sample data
 }lidar_scan_t;
 
 
@@ -102,5 +105,7 @@ returncode_t LidarGetInformation(lidar_devEUI_t *devEUI);
 returncode_t LidarScanStart(void);
 returncode_t LidarScanStop(void);
 returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus);
+returncode_t checkCS(lidar_scan_t *lidarData);
+returncode_t convertSample(lidar_scan_t *lidarData);
 returncode_t lidarDataProcess(void);
 
