@@ -110,8 +110,9 @@ returncode_t LidarInit(void) {
 		return memoryfail;
 	}
 	LIDAR_DEV_ENABLE();
-	LIDAR_MOTOR_ENABLE();
+	LIDAR_MOTOR_DISABLE();
 	LidarSetSpeed(0);
+	//ret = LidarScanStop();
 	return ret;
 }
 
@@ -200,6 +201,10 @@ returncode_t LidarGetInformation(lidar_devEUI_t *devEUI) {
 returncode_t LidarScanStart(void){
 	LOG_LIDAR_ENTER();
 	HAL_StatusTypeDef status;
+
+	LIDAR_DEV_ENABLE();
+	LIDAR_MOTOR_ENABLE();
+
 	uint8_t command[COMMAND_SIZE] = {(LIDAR_SCAN_START & 0xFF00) >> 8, (LIDAR_SCAN_START & 0x00FF)};
 	//uint8_t command[COMMAND_SIZE] = {0x60, 0xA5};
 	status = lidar.uart.tx(command, NULL, 0);
@@ -222,7 +227,8 @@ returncode_t LidarScanStart(void){
  * @note This function uses UART communication with DMA for efficient data transmission.
  */
 returncode_t LidarScanStop(void) {
-	LOG_LIDAR_ENTER();
+	//LOG_LIDAR_ENTER();
+	LIDAR_MOTOR_DISABLE();
 	HAL_StatusTypeDef status;
 	uint8_t command[COMMAND_SIZE] = {(LIDAR_SCAN_STOP & 0xFF00) >> 8, (LIDAR_SCAN_STOP & 0x00FF)};
 	status = lidar.uart.tx(command, NULL, 0);
@@ -271,6 +277,8 @@ returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus) {
 		}
 		else {
 			LOG_LIDAR_ERROR("Header error 0x%02X %02X", buf[0], buf[1]);
+			free(buf);
+			return wrongparameter;
 		}
 	}
 	else {
@@ -278,7 +286,23 @@ returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus) {
 		free(buf);
 		return transmission_failed;
 	}
+	LOG_LIDAR_DEBUG("healthStatus: -status = %s, -error: 0x[%02X %02X]", 
+					(healthStatus->StatusCode == 0) ? "running normaly" : (healthStatus->StatusCode == 1) ? "running warning" : "running incorrectly",
+					healthStatus->ErrorCode[0], healthStatus->ErrorCode[1]);
 	free(buf);
+	return success;
+}
+
+returncode_t lidarRestart(void) {
+	LOG_LIDAR_ENTER();
+	HAL_StatusTypeDef status;
+	uint8_t command[COMMAND_SIZE] = {(LIDAR_RESTART & 0xFF00) >> 8, (LIDAR_RESTART & 0x00FF)};
+	status = lidar.uart.tx(command, NULL, 0);
+	if(status != HAL_OK) {
+		LOG_LIDAR_ERROR("transmit error: %d", status);
+		return transmission_failed;
+	}
+	return success;
 }
 
 bool checkCS(lidar_scan_t *lidarData) {
@@ -295,31 +319,44 @@ bool checkCS(lidar_scan_t *lidarData) {
 	}
 }
 
-returncode_t convertSample(lidar_scan_t *lidarScanData) { //TODO
+returncode_t convertSample(lidar_scan_t *lidarData) { //TODO
 	/******************** convert distance ***********************/
-	//uint16_t distance[(lidarScanData->LSN)/Si_SIZE];
-	uint16_t distance[2] = {1000, 8000};
+	uint16_t sampleSize = lidarData->LSN/Si_SIZE;
+	//uint16_t distance[sampleSize];
+	position_t position[sampleSize];
 	int i = 0;
-	/*for(i = 0; i < ((lidarScanData->LSN)/Si_SIZE); i++) {
-		distance[i] = ((lidarScanData->SI[0] << 8) + lidarScanData->SI[1])/4;
-	}*/
+	for(i = 0; i < sampleSize; i++) {
+		//distance[i] = ((lidarData->SI[0] << 8) + lidarData->SI[1])/4;
+		position[i].distance = ((lidarData->SI[i] << 8) + lidarData->SI[i+1])/4; // distance in mm
+	}
 
-	/******************** convert angle ***********************/
+	/******************** angle ***********************/
 	float angleFSA, angleLSA, deltaAngle;
-	angleFSA = (0x6FE5 >> 1)/64;
-	angleLSA = (0x79BD >> 1)/64;
-	//angleFSA = ((((lidarScanData->FSA[0]) << 8) + lidarScanData->FSA[1]) >> 1)/64;
-	//angleLSA = ((((lidarScanData->LSA[0]) << 8) + lidarScanData->LSA[1]) >> 1)/64;
+	angleFSA = ((((lidarData->FSA[1]) << 8) + lidarData->FSA[0]) >> 1)/64;
+	angleLSA = ((((lidarData->LSA[1]) << 8) + lidarData->LSA[0]) >> 1)/64;
+	if(angleLSA < angleFSA) {
+		angleLSA += 360;
+	}
 	deltaAngle = angleLSA - angleFSA;
 
-	/******************** angle correction ***********************/
-	float correctAngle[2];
-	//for(i = 0; i < ((lidarScanData->LSN)/Si_SIZE); i++) {
-	for(i = 0; i < 2; i++) {
-		if(distance[i]>0) {
-			correctAngle[i] = atan(21.8 * (155.3 - distance[i]) / (155.3 * distance[i])) * 180/3.14;
+	/******************** angle correction & convertion ***********************/
+	//float correctAngle[sampleSize];
+	for(i = 0; i < sampleSize; i++) {
+		if(position[i].distance>0) {
+			//correctAngle[i] = deltaAngle/sampleSize * i + angleFSA + (atan(21.8 * (155.3 - distance[i]) / (155.3 * distance[i])) * 180/3.14);
+			position[i].angle = deltaAngle/sampleSize * i + angleFSA + (atan(21.8 * (155.3 - position[i].distance) / (155.3 * position[i].distance)) * 180/3.14);
+			if(position[i].angle >= 360.0f) {
+				position[i].angle -= 360.0f;
+			}
 		}
 	}
+	lidar.position = malloc(sampleSize * sizeof(position_t));
+	if (lidar.position == NULL) {
+		return mallocfail;
+	}	
+	memcpy(&(lidar.position), position, sampleSize);
+	free(lidar.position); // TODO
+	return success;
 }
 /*
 returncode_t calculateOptimalDirection(void) {
@@ -377,46 +414,56 @@ double calculateExpectedDistance(double distanceInitiale, double angleDecalage) 
 	return nouvelleDistance;
 }*/
 
-returncode_t lidarDataProcess(void) {
-	LOG_LIDAR_ENTER();
+returncode_t getLidarScanData(lidar_scan_t *lidarScanData) {
 	HAL_StatusTypeDef status = 0;
-	static uint8_t lidarScanRawData[256];
-	static lidar_scan_t lidarScanData;
+	int size = 0;
+	uint8_t lidarScanRawData[256];
 	status = lidar.uart.rx(lidarScanRawData, 256);
 	if(status == HAL_OK) {
-		if (xSemaphoreTake(sem_uart_read, portMAX_DELAY) == pdTRUE) {	// Wait for DMA Notification
-			LidarScanStop();
-			
+		if (xSemaphoreTake(sem_uart_read, 100) == pdTRUE) {	// Wait for DMA Notification
+			//LidarScanStop();
 			//printf(COLOR_MAGENTA"*** %s\n", CONVERT_TO_STRING(lidarScanRawData, 256));
 			
 			int j = 0;
 			for(j = 0; j < 256; j++) {
 				if(strncmp(&(lidarScanRawData[j]), (uint8_t[]){0xA5, 0x5A}, 2) == 0) {
 					printf("main header detected @ %d\n", j);
-					LOG_LIDAR_DEBUG("main header detected @ %d", j);
-					memcpy(lidarScanData.PH, &(lidarScanRawData[HEADER_SIZE]), PH_SIZE);
-					memcpy(&(lidarScanData.CT), &(lidarScanRawData[HEADER_SIZE + 2]), CT_SIZE);
-					memcpy(&(lidarScanData.LSN), &(lidarScanRawData[HEADER_SIZE + 3]), LSN_SIZE);
-					memcpy(lidarScanData.FSA, &(lidarScanRawData[HEADER_SIZE + 4]), FSA_SIZE);
-					memcpy(lidarScanData.LSA, &(lidarScanRawData[HEADER_SIZE + 6]), LSA_SIZE);
-					memcpy(lidarScanData.CS, &(lidarScanRawData[HEADER_SIZE + 8]), CS_SIZE);
-					lidarScanData.SI = malloc(lidarScanData.LSN * sizeof(uint8_t));
-					memcpy(lidarScanData.SI, &(lidarScanRawData[HEADER_SIZE + 10]), lidarScanData.LSN);
+					//LOG_LIDAR_DEBUG("main header detected @ %d", j);
+					memcpy(lidarScanData->PH, &(lidarScanRawData[HEADER_SIZE]), PH_SIZE);
+					memcpy(&(lidarScanData->CT), &(lidarScanRawData[HEADER_SIZE + 2]), CT_SIZE);
+					memcpy(&(lidarScanData->LSN), &(lidarScanRawData[HEADER_SIZE + 3]), LSN_SIZE);
+					memcpy(lidarScanData->FSA, &(lidarScanRawData[HEADER_SIZE + 4]), FSA_SIZE);
+					memcpy(lidarScanData->LSA, &(lidarScanRawData[HEADER_SIZE + 6]), LSA_SIZE);
+					memcpy(lidarScanData->CS, &(lidarScanRawData[HEADER_SIZE + 8]), CS_SIZE);
+					//lidarScanData->SI = malloc((lidarScanData->LSN) * sizeof(uint8_t));
+					if (lidarScanData->SI == NULL) {
+						return mallocfail;
+					} else {
+						//memcpy(lidarScanData->SI, &(lidarScanRawData[HEADER_SIZE + j + 10]), lidarScanData->LSN);
+						for(int k = 0; k < lidarScanData->LSN; k++) {
+							lidarScanData->SI[k] = lidarScanRawData[HEADER_SIZE + k + 10];
+						}
+					}
 					break;
 				}
-				else {
-					LOG_LIDAR_DEBUG("check for data header");
-					if(strncmp(&(lidarScanRawData[j]), (uint8_t[]){0x55, 0xAA}, 2) == 0) {
-						LOG_LIDAR_DEBUG("header detected @ %d", j);
-						memcpy(lidarScanData.PH, &(lidarScanRawData[j]), PH_SIZE);
-						memcpy(&(lidarScanData.CT), &(lidarScanRawData[j + 2]), CT_SIZE);
-						memcpy(&(lidarScanData.LSN), &(lidarScanRawData[j + 3]), LSN_SIZE);
-						memcpy(lidarScanData.FSA, &(lidarScanRawData[j + 4]), FSA_SIZE);
-						memcpy(lidarScanData.LSA, &(lidarScanRawData[j + 6]), LSA_SIZE);
-						memcpy(lidarScanData.CS, &(lidarScanRawData[j  + 8]), CS_SIZE);
-						memcpy(lidarScanData.SI, &(lidarScanRawData[j + 10]), Si_SIZE * 50);
-						break;
+				else if(strncmp(&(lidarScanRawData[j]), (uint8_t[]){0xAA, 0x55}, 2) == 0) {
+					//LOG_LIDAR_DEBUG("header detected @ %d", j);
+					memcpy(lidarScanData->PH, &(lidarScanRawData[j]), PH_SIZE);
+					memcpy(&(lidarScanData->CT), &(lidarScanRawData[j + 2]), CT_SIZE);
+					memcpy(&(lidarScanData->LSN), &(lidarScanRawData[j + 3]), LSN_SIZE);
+					memcpy(lidarScanData->FSA, &(lidarScanRawData[j + 4]), FSA_SIZE);
+					memcpy(lidarScanData->LSA, &(lidarScanRawData[j + 6]), LSA_SIZE);
+					memcpy(lidarScanData->CS, &(lidarScanRawData[j  + 8]), CS_SIZE);
+					//lidarScanData->SI = malloc((lidarScanData->LSN) * sizeof(uint8_t));
+					if (lidarScanData->SI == NULL) {
+						return mallocfail;
+					} else {
+						//memcpy(lidarScanData->SI, &(lidarScanRawData[j + 10]), lidarScanData->LSN);
+						for(int k = 0; k < lidarScanData->LSN; k++) {
+							lidarScanData->SI[k] = lidarScanRawData[k + 10];
+						}
 					}
+					break;
 				}
 			}
 			if(j > 255) {
@@ -424,29 +471,14 @@ returncode_t lidarDataProcess(void) {
 				return wrongparameter;
 			}
 		}
+		else {
+			LOG_LIDAR_WARN("semaphore timeout");
+			return transmission_no_response;
+		}
 	}
 	else {
 		LOG_LIDAR_ERROR("uart Rx error: %d", status);
+		return transmission_no_response;
 	}
-	//LOG_LIDAR_INFO("scan data PH: 0x%02X %02X", lidarScanData.PH[0], lidarScanData.PH[1]);
-	//LOG_LIDAR_INFO("scan data CT: 0x%02X", lidarScanData.CT);
-	//LOG_LIDAR_INFO("scan data LSN: 0x%02X", lidarScanData.LSN);
-	//LOG_LIDAR_INFO("scan data FSA: %b", lidarScanData.PH, FSA_SIZE);
-	//LOG_LIDAR_INFO("scan data LSA: %b", lidarScanData.PH, LSA_SIZE);
-	//LOG_LIDAR_INFO("scan data CS: %b", lidarScanData.PH, CS_SIZE);
-	//LOG_LIDAR_INFO("scan data si: %b", lidarScanData.SI, Si_SIZE * 50);
-
-	if(checkCS(&lidarScanData)){
-		convertSample(&lidarScanData);
-	}
-	free(lidarScanData.SI);
 	return success;
-/*
-	if(robotState() == CAT) {
-		findMousePosition();
-	}
-	else {
-		calculateOptimalDirection();
-	}
-*/
 }

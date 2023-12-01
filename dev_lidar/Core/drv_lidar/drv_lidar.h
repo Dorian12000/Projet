@@ -63,7 +63,7 @@ typedef struct uart_s{
 }uart_t;
 
 typedef struct position_s{
-	uint8_t angle;
+	float angle;
 	uint16_t distance;
 }position_t;
 
@@ -81,7 +81,7 @@ typedef struct Lidar_sc{
 	uint8_t FSA[2]; // Start Angle
 	uint8_t LSA[2]; // Stop Angle
 	uint8_t CS[2]; // Check code
-	uint8_t *SI; // sample data
+	uint8_t SI[100]; // sample data
 }lidar_scan_t;
 
 
@@ -94,18 +94,21 @@ typedef struct lidar_devEUI_s {
 
 typedef struct lidar_healthStatus_s{
 	uint8_t StatusCode;
-	uint8_t ErrorCode;
+	uint8_t ErrorCode[2];
 }lidar_healthStatus_t;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 bool isLidarDataReady(void);
 returncode_t LidarInit(void);
+
 void LidarSetSpeed(uint8_t speed);
 returncode_t LidarGetInformation(lidar_devEUI_t *devEUI);
 returncode_t LidarScanStart(void);
 returncode_t LidarScanStop(void);
 returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus);
-returncode_t checkCS(lidar_scan_t *lidarData);
+returncode_t lidarRestart(void);
+
+bool checkCS(lidar_scan_t *lidarData);
 returncode_t convertSample(lidar_scan_t *lidarData);
-returncode_t lidarDataProcess(void);
+returncode_t getLidarScanData(lidar_scan_t *lidarScanData);
 

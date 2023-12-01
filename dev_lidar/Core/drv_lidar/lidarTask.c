@@ -46,6 +46,10 @@ bool isLidarScanning(void) {
 	return (lidarHandle.state == LIDAR_SCANNING);
 }
 
+void setLidarState(lidarState_t state) {
+	lidarHandle.state = state;
+}
+
 /**
  * @brief Lidar task function.
  *
@@ -64,8 +68,11 @@ bool isLidarScanning(void) {
  * @return None.
  */
 TaskFunction_t lidarTask(void) {
+	returncode_t status;
 	lidar_devEUI_t devEUI;
-	lidar_scan_t lidarSc;
+	lidar_scan_t lidarScanData;
+	lidar_healthStatus_t healthStatus;
+
 
 	lidarHandle.state = LIDAR_INIT;
 	lidarHandle.lastState = lidarHandle.state;
@@ -73,10 +80,12 @@ TaskFunction_t lidarTask(void) {
 
 	while(1) {
 		switch (lidarHandle.state) {
+			
 			case LIDAR_INIT: {
 				if(xTimerIsTimerActive(lidarHandle.timer) == pdFALSE) {
 					xTimerStart(lidarHandle.timer, 0);
 					LidarInit();
+					lidarRestart();
 				}
 				if(LidarGetInformation(&devEUI) == success) {
 					LOG_LIDAR_INFO(COLOR_GREEN"init lidar successful");
@@ -92,17 +101,56 @@ TaskFunction_t lidarTask(void) {
 			case LIDAR_SCANNING: {
 				if(xTimerIsTimerActive(lidarHandle.timer) == pdFALSE) {
 					xTimerStart(lidarHandle.timer, 0);
-					LidarScanStart();
+					while(LidarScanStart() != success) {
+						LOG_LIDAR_ERROR("cannot start scan");
+					}
+					LOG_LIDAR_INFO("scan started");
 				}
-				lidarDataProcess();
-				osDelay(1000);
+				status = getLidarScanData(&lidarScanData);
+				if(status != success) {
+					if(lidarScanData.SI != NULL) {
+						//free(lidarScanData.SI);
+					}
+					lidarHandle.state = LIDAR_ERROR;
+					break;
+				}
+				//if(checkCS(&lidarScanData)){
+					status = convertSample(&lidarScanData);
+					if(status != success) {
+						LOG_LIDAR_WARN("convert sample failed: %d", status);
+					}
+					//free(lidarScanData.SI);
+				//}
+				/*
+				if(robotState() == CAT) {
+					findMousePosition();
+				}
+				else {
+					calculateOptimalDirection();
+				}
+				*/
+				//osDelay(1000);
 			}
 			case LIDAR_PROCESS: {
 				
-				lidarHandle.state = LIDAR_SCANNING;
+				//lidarHandle.state = LIDAR_SCANNING;
 				break;
 			}
 			case LIDAR_STANDBY: {
+				break;
+			}
+			case LIDAR_ERROR : {
+				while(LidarScanStop() != success) {
+					osDelay(1);
+				}
+				status = LidarHealthStatus(&healthStatus);
+				if(healthStatus.StatusCode == 2) {
+					lidarRestart();
+					lidarHandle.state = LIDAR_INIT;
+				}
+				else {
+					lidarHandle.state = LIDAR_SCANNING;
+				}
 				break;
 			}
 			default:
