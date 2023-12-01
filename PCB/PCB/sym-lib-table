@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "MP1475")(type "KiCad")(uri "${KIPRJMOD}/MP1475DJ-LF-P.kicad_sym")(options "")(descr ""))
+  (lib (name "SWITCH")(type "KiCad")(uri "${KIPRJMOD}/472121010111/472121010111.kicad_sym")(options "")(descr ""))
+)
