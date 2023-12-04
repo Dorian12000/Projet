@@ -32,13 +32,41 @@ typedef struct {
 TaskHandle_t h_task_main = NULL;
 static mainHandle_t mainHandle;
 
-mainState_t getmainState(void) {
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
+	xHigherPriorityTaskWoken = pdFALSE;
+	BaseType_t xHigherPriorityTaskWoken;
+
+	if(GPIO_Pin == BUMPER_F_Pin) {
+		xTaskNotifyFromISR(mainHandle, BUMPER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken);
+	} else if(GPIO_Pin == BUMPER_B_Pin) {
+		xTaskNotifyFromISR(mainHandle, BUMPER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+	} else if(GPIO_Pin == BUMPER_R_Pin) {
+		xTaskNotifyFromISR(mainHandle, BUMPER_R_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+	} else if(GPIO_Pin == BUMPER_L_Pin) {
+		xTaskNotifyFromISR(mainHandle, BUMPER_L_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+	/*} else if(GPIO_Pin == V_BORDURE_F_Pin) {
+		xTaskNotifyFromISR(motorTaskHandle, BORDER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+	} else if(GPIO_Pin == V_BORDURE_B_Pin) {
+		xTaskNotifyFromISR(motorTaskHandle, BORDER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+	}*/
+	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+}
+
+mainState_t getMainState(void) {
 	return mainHandle.state;
 }
 
+void setMainState(void) {
+	if(mainHandle.state == MAIN_CAT) {
+		mainHandle.state = MAIN_MOUSE;
+	} else if(mainHandle.state == MAIN_MOUSE) {
+		mainHandle.state = MAIN_CAT;
+	}
+}
 
 void mainTask(void) {
 	returncode_t status;
+	uint32_t ulNotifiedValue;
 
 	mainHandle.state = MAIN_INIT;
 	mainHandle.lastState = mainHandle.state;
@@ -46,7 +74,6 @@ void mainTask(void) {
 
 	while(1) {
 		switch (mainHandle.state) {
-			
 			case MAIN_INIT: {
 				if(xTimerIsTimerActive(mainHandle.timer) == pdFALSE) {
 					xTimerStart(mainHandle.timer, 0);
@@ -84,7 +111,10 @@ void mainTask(void) {
 			xTimerStop(mainHandle.timer, 0);
 			mainHandle.lastState = mainHandle.state;
 		}
-		
+		if(xTaskNotifyWait(0, ULONG_MAX, &ulNotifiedValue, 100) == pdTRUE) {
+			setMainState();
+			//xTaskNotify(lidarHandle, &ulNotifiedValue, eSetBits); //TODO notify side that has beed affected
+		}
 		//vTaskDelay(1);
 	}
 }

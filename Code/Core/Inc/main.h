@@ -75,6 +75,7 @@ void Error_Handler(void);
 #define USART1_RX_VCP_RX_GPIO_Port GPIOC
 #define V_BORDURE_R_Pin GPIO_PIN_0
 #define V_BORDURE_R_GPIO_Port GPIOB
+#define V_BORDURE_R_EXTI_IRQn EXTI0_1_IRQn
 #define DEV_EN_Pin GPIO_PIN_1
 #define DEV_EN_GPIO_Port GPIOB
 #define M_EN_Pin GPIO_PIN_2
@@ -97,14 +98,19 @@ void Error_Handler(void);
 #define LED_B_GPIO_Port GPIOB
 #define BUMPER_F_Pin GPIO_PIN_5
 #define BUMPER_F_GPIO_Port GPIOB
+#define BUMPER_F_EXTI_IRQn EXTI4_15_IRQn
 #define BUMPER_B_Pin GPIO_PIN_6
 #define BUMPER_B_GPIO_Port GPIOB
+#define BUMPER_B_EXTI_IRQn EXTI4_15_IRQn
 #define BUMPER_R_Pin GPIO_PIN_7
 #define BUMPER_R_GPIO_Port GPIOB
+#define BUMPER_R_EXTI_IRQn EXTI4_15_IRQn
 #define BUMPER_L_Pin GPIO_PIN_8
 #define BUMPER_L_GPIO_Port GPIOB
+#define BUMPER_L_EXTI_IRQn EXTI4_15_IRQn
 #define V_BORDURE_F_Pin GPIO_PIN_9
 #define V_BORDURE_F_GPIO_Port GPIOB
+#define V_BORDURE_F_EXTI_IRQn EXTI4_15_IRQn
 
 /* USER CODE BEGIN Private defines */
 
