@@ -1,0 +1,13 @@
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:38:6:HAL_UART_RxCpltCallback	3
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:63:33:LidarUarTx	1
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:84:33:LidarUartRx	1
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:103:14:LidarInit	2
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:129:6:LidarSetSpeed	1
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:151:14:LidarGetInformation	4
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:196:14:LidarScanStart	2
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:224:14:LidarScanStop	2
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:254:14:LidarHealthStatus	6
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:286:14:lidarRestart	2
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:298:6:checkCS	3
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:312:14:convertSample	9
+C:/Users/doria/OneDrive/Documents/ENSEA/ESE/robot/Projet/Code/dev_lidar/Src/drv_lidar.c:403:14:getLidarScanData	9
