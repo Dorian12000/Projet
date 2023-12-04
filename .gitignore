@@ -55,3 +55,13 @@ dkms.conf
 PCB/robot-backups/
 Tets/
 
+CMakeLists.txt
+CMakePresets.json
+vcpkg-configuration.json
+.vs
+.vscode
+build
+cmake
+Debug
+TP_CapteurEtReseaux.launch
+language.settings.xml
