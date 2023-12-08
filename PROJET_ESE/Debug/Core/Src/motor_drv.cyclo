@@ -1,0 +1,3 @@
+../Core/Src/motor_drv.c:14:6:initMotor	1
+../Core/Src/motor_drv.c:24:6:setMotorSpeedFwd	2
+../Core/Src/motor_drv.c:35:6:stopMotor	3

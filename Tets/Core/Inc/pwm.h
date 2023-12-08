@@ -24,7 +24,6 @@ typedef struct PWM_struct
 #define INIT_PWM(pwm)  __HAL_TIM_SET_COMPARE((pwm).timer, (pwm).channel, 0)
 #define START_PWM(pwm) HAL_TIM_PWM_Start((pwm).timer, (pwm).channel)
 #define STOP_PWM(pwm)  HAL_TIM_PWM_Stop((pwm).timer, (pwm).channel)
-
 void setPwmDutyCycle(PWM *pwm, uint8_t duty_cycle);
 
 

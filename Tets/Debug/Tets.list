@@ -2217,6 +2217,7 @@ void setPwmDutyCycle(PWM *pwm, uint8_t duty_cycle)
  80015f0:	4413      	add	r3, r2
  80015f2:	009b      	lsls	r3, r3, #2
  80015f4:	81fb      	strh	r3, [r7, #14]
+
     if (duty_cycle16 < MIN_DUTY_CYCLE_MOTOR)
     {
     	duty_cycle16 = MIN_DUTY_CYCLE_MOTOR;

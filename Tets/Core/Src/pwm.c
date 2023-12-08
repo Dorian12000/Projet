@@ -12,6 +12,7 @@
 void setPwmDutyCycle(PWM *pwm, uint8_t duty_cycle)
 {
 	uint16_t duty_cycle16 = duty_cycle * MAX_DUTY_CYCLE_MOTOR / 100;
+
     if (duty_cycle16 < MIN_DUTY_CYCLE_MOTOR)
     {
     	duty_cycle16 = MIN_DUTY_CYCLE_MOTOR;
