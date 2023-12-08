@@ -23,6 +23,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "auxiliaryTask.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -100,7 +101,8 @@ int main(void)
 	MX_USART1_UART_Init();
 	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
-
+	auxiliaryInit();
+	createAuxiliaryTask();
 	/* USER CODE END 2 */
 
 	/* Call init function for freertos objects (in freertos.c) */
