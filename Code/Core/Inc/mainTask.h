@@ -29,12 +29,12 @@ typedef enum {
 	BUMPER_L_NOTIFY,
 	BORDER_F_NOTIFY,
 	BORDER_B_NOTIFY,
-}mainState_t;
+}ISRnotify_t;
 
 mainState_t getMainState(void);
-void setMainState(void)
+void setMainState(void);
 
-void createMainTask(void);
+uint8_t createMainTask(void);
 void mainTask(void);
 
 #endif

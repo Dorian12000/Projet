@@ -9,9 +9,12 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/subdir.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/subdir.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/subdir.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/subdir.mk
 -include Drivers/STM32G0xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
--include Core/Src/log/subdir.mk
 -include Core/Src/subdir.mk
 -include objects.mk
 
@@ -61,8 +64,8 @@ all: main-build
 main-build: PROJET_ESE.elf secondary-outputs
 
 # Tool invocations
-PROJET_ESE.elf PROJET_ESE.map: $(OBJS) $(USER_OBJS) C:\Users\gourd\OneDrive\Bureau\ESE\Projet\Projet\Code\STM32G070RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "PROJET_ESE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\gourd\OneDrive\Bureau\ESE\Projet\Projet\Code\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PROJET_ESE.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+PROJET_ESE.elf PROJET_ESE.map: $(OBJS) $(USER_OBJS) C:\Users\doria\OneDrive\Documents\ENSEA\ESE\robot\Projet\Code\STM32G070RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "PROJET_ESE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\doria\OneDrive\Documents\ENSEA\ESE\robot\Projet\Code\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PROJET_ESE.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

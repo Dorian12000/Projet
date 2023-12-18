@@ -16,7 +16,8 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "log/logger.h"
-#include "types.h"
+#include "log/types.h"
+#include <limits.h>
 
 #include "mainTask.h"
 
@@ -29,26 +30,26 @@ typedef struct {
 	TimerHandle_t timer;
 }mainHandle_t;
 
-TaskHandle_t h_task_main = NULL;
-static mainHandle_t mainHandle;
+TaskHandle_t h_task_main;
+mainHandle_t mainHandle;
 
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
-	xHigherPriorityTaskWoken = pdFALSE;
-	BaseType_t xHigherPriorityTaskWoken;
-
+	LOG_MAIN_ENTER();
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	LOG_MAIN_ENTER();
 	if(GPIO_Pin == BUMPER_F_Pin) {
-		xTaskNotifyFromISR(mainHandle, BUMPER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken);
+		xTaskNotifyFromISR(h_task_main, BUMPER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken);
 	} else if(GPIO_Pin == BUMPER_B_Pin) {
-		xTaskNotifyFromISR(mainHandle, BUMPER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+		xTaskNotifyFromISR(h_task_main, BUMPER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
 	} else if(GPIO_Pin == BUMPER_R_Pin) {
-		xTaskNotifyFromISR(mainHandle, BUMPER_R_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+		xTaskNotifyFromISR(h_task_main, BUMPER_R_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
 	} else if(GPIO_Pin == BUMPER_L_Pin) {
-		xTaskNotifyFromISR(mainHandle, BUMPER_L_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+		xTaskNotifyFromISR(h_task_main, BUMPER_L_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
 	/*} else if(GPIO_Pin == V_BORDURE_F_Pin) {
 		xTaskNotifyFromISR(motorTaskHandle, BORDER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
 	} else if(GPIO_Pin == V_BORDURE_B_Pin) {
-		xTaskNotifyFromISR(motorTaskHandle, BORDER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
-	}*/
+		xTaskNotifyFromISR(motorTaskHandle, BORDER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );*/
+	}
 	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
@@ -87,7 +88,7 @@ void mainTask(void) {
 					xTimerStart(mainHandle.timer, 0);
 					
 				}
-				
+				break;
 			}
 			case MAIN_MOUSE: {
 				if(xTimerIsTimerActive(mainHandle.timer) == pdFALSE) {
@@ -111,19 +112,26 @@ void mainTask(void) {
 			xTimerStop(mainHandle.timer, 0);
 			mainHandle.lastState = mainHandle.state;
 		}
-		if(xTaskNotifyWait(0, ULONG_MAX, &ulNotifiedValue, 100) == pdTRUE) {
+		if(xTaskNotifyWait(0, ULONG_MAX, &ulNotifiedValue, 5000) == pdTRUE) {
 			setMainState();
+			HAL_GPIO_TogglePin(LED_B_GPIO_Port, LED_B_Pin);
+			HAL_GPIO_TogglePin(LED_R_GPIO_Port, LED_R_Pin);
 			//xTaskNotify(lidarHandle, &ulNotifiedValue, eSetBits); //TODO notify side that has beed affected
+			taskENTER_CRITICAL();
+			vTaskDelay(2000);
+			taskEXIT_CRITICAL();
 		}
 		//vTaskDelay(1);
 	}
 }
 
-void createMainTask(void) {
+uint8_t createMainTask(void) {
 	if (xTaskCreate(mainTask, "Main", TASK_MAIN_STACK_DEPTH, NULL, TASK_MAIN_PRIORITY, &h_task_main) != pdPASS) {
 		LOG_RTOS_ERROR("Error creating task Main");
+		return false;
 	}
 	else {
 		LOG_RTOS_INFO(COLOR_GREEN"Main task create");
+		return true;
 	}
 }

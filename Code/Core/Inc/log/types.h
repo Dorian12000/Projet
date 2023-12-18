@@ -147,23 +147,14 @@ typedef enum{
 	unknownerror,
 	incorrectsize,
 	mallocfail,
-	decodefail,
-	encodefail,			// 5
-	filternotready,
 	memoryfail,
 	wrongparameter,
 	memoryfull,
-	endoffile,			// 10
-	filenotexist,
 	empty,
-	wrongtimestamp,
 	notenoughdata,
-	tokennotauthorized,	// 15
-	server_down,
 	transmission_failed,
 	transmission_no_response,
 	transmission_lost,
-	connexion_lost,
 	busy,
 	notfound
 }returncode_t;
