@@ -15,8 +15,8 @@
 
 #include "main.h"
 #include "cmsis_os.h"
-#include "log/logger.h"
-#include "log/types.h"
+#include "../../dev_lidar/Inc/logger.h"
+#include "./../dev_lidar/Inc/types.h"
 #include <limits.h>
 
 #include "mainTask.h"
@@ -36,7 +36,6 @@ mainHandle_t mainHandle;
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 	LOG_MAIN_ENTER();
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	LOG_MAIN_ENTER();
 	if(GPIO_Pin == BUMPER_F_Pin) {
 		xTaskNotifyFromISR(h_task_main, BUMPER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken);
 	} else if(GPIO_Pin == BUMPER_B_Pin) {

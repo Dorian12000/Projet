@@ -26,8 +26,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "log/logger.h"
-#include "log/types.h"
+#include "./../dev_lidar/Inc/logger.h"
+#include "./../dev_lidar/Inc/types.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
