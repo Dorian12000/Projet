@@ -61,5 +61,4 @@ vcpkg-configuration.json
 build
 cmake
 Debug
-TP_CapteurEtReseaux.launch
 language.settings.xml
