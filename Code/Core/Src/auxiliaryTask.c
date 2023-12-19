@@ -41,8 +41,10 @@ void auxiliaryTask(){
 
 	while (1) {
 		batteryLevel = getBatteryLevel();
-		LOG_LED_DEBUG("Battery OK");
+		HAL_UART_Transmit(&huart1, "battery ok\n",13, 1);
+		LOG_LED_DEBUG("Battery OK : %f ", batteryLevel);
 		if (batteryLevel < BATTERY_THRESHOLD) {
+			HAL_UART_Transmit(&huart1, "battery no ok\n",16, 1);
 			xSemaphoreTake(xBatterySemaphore, portMAX_DELAY);
 			LOG_LED_DEBUG("Low battery");
 			xSemaphoreGive(xBatterySemaphore);

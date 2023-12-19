@@ -1,7 +1,7 @@
 "./Core/Src/adc.o"
 "./Core/Src/app_freertos.o"
+"./Core/Src/auxiliaryTask.o"
 "./Core/Src/gpio.o"
-"./Core/Src/ledTask.o"
 "./Core/Src/main.o"
 "./Core/Src/pwm.o"
 "./Core/Src/stm32g0xx_hal_msp.o"

@@ -1,0 +1,4 @@
+../Core/Src/auxiliaryTask.c:36:6:auxiliaryInit	1
+../Core/Src/auxiliaryTask.c:39:6:auxiliaryTask	2
+../Core/Src/auxiliaryTask.c:55:7:getBatteryLevel	2
+../Core/Src/auxiliaryTask.c:69:6:createAuxiliaryTask	2

@@ -18,7 +18,17 @@
 #include "gpio.h"
 #include "log/types.h"
 #include "cmsis_os.h"
-/***************************************commands**************************************/
-float readBatteryLevel();
+/***************************************macros**************************************/
+
+#define TASK_AUXILIARY_STACK_DEPTH 512
+#define TASK_AUXILIARY_PRIORITY 1
+#define BATTERY_SUPPLY 7.2
+#define BATTERY_THRESHOLD 6.4
+#define RESOLUTION_ADC 4096
+/***************************************functions**************************************/
+float getBatteryLevel();
+void createAuxiliaryTask();
+void auxiliaryTask();
+void auxiliaryInit();
 
 

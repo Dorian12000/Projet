@@ -288,4 +288,4 @@ VP_TIM17_VS_ClockSourceINT.Mode=Enable_Timer
 VP_TIM17_VS_ClockSourceINT.Signal=TIM17_VS_ClockSourceINT
 board=custom
 rtos.0.ip=FREERTOS
-isbadioc=true
+isbadioc=false
