@@ -22,10 +22,11 @@
 
 //Les états possibles
 typedef enum {
-	ATTENTE,
-	SOURIS,
-	CHAT,
-	STOP
+	WAITING,
+	MOUSE,
+	CAT,
+	STOP,
+	ERROR
 }algoState_t;
 void ConfigAlgoState(algoState_t state);
 

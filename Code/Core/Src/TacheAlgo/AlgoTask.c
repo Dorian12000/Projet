@@ -16,17 +16,20 @@
 
 // TODO faire les fonctions callbacks du bumper
 // Envoyer une notifications pour savoir si c'est une souris ou un chat
+#define TASK_ALGO_STACK_DEPTH 512
+#define TASK_ALGO_PRIORITY 50
 #include "AlgoTask.h"
+#include "../Inc/AlgoTask.h"
 typedef struct {
-	AlgoState_t state;
-	AlgoState_t lastState;
+	algoState_t state;
+	algoState_t lastState;
 	TimerHandle_t timer;
 }algoHandle_t;
-
-algoHandle_t algoHandle;
+TaskHandle h_task_algo = NULL;
+static algoHandle_t algoHandle;
 
 void ConfigAlgoState(algoState_t state){
-	algoHandle_t state = state
+	algoHandle_t state = state;
 }
 typedef enum {
 	ATTENTE,
@@ -54,7 +57,14 @@ TaskFunction_t mouse_cat_AlgoTask(void) {
 
 	//TODO Renvoyer position pour s'échapper du robot
 
-
-
 }
+void createAlgoTask(void) {
+	if (xTaskCreate(algoTask, "Algo", TASK_ALGO_STACK_DEPTH, NULL, TASK_ALGO_PRIORITY, &h_task_algo) != pdPASS) {
+		LOG_LIDAR_ERROR("Error creating task algo\r\n");
+	}
+	else {
+		LOG_LIDAR_DEBUG(COLOR_GREEN"Algo task create");
+	}
+}
+
 
