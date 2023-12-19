@@ -16,8 +16,9 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "../../dev_lidar/Inc/logger.h"
-#include "./../dev_lidar/Inc/types.h"
+#include "../../dev_lidar/Inc/types.h"
 #include <limits.h>
+#include "../../dev_lidar/Inc/lidarTask.h"
 
 #include "mainTask.h"
 
@@ -52,10 +53,23 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
+/**
+ * @brief Gets the current state of the main system.
+ *
+ * This function retrieves and returns the current state of the main system.
+ *
+ * @return The current state of the main system.
+ */
 mainState_t getMainState(void) {
 	return mainHandle.state;
 }
 
+/**
+ * @brief Toggles the main system state between CAT and MOUSE.
+ *
+ * This function toggles the main system state between CAT and MOUSE. If the
+ * current state is CAT, it switches to MOUSE, and vice versa.
+ */
 void setMainState(void) {
 	if(mainHandle.state == MAIN_CAT) {
 		mainHandle.state = MAIN_MOUSE;
@@ -64,6 +78,14 @@ void setMainState(void) {
 	}
 }
 
+/**
+ * @brief Main task that controls the overall system behavior.
+ *
+ * This task is responsible for managing the overall behavior of the system.
+ * It transitions between different states and performs actions based on the
+ * current state. Additionally, it toggles LEDs, processes notifications, and
+ * handles timeouts using a timer.
+ */
 void mainTask(void) {
 	returncode_t status;
 	uint32_t ulNotifiedValue;
@@ -78,6 +100,7 @@ void mainTask(void) {
 				if(xTimerIsTimerActive(mainHandle.timer) == pdFALSE) {
 					xTimerStart(mainHandle.timer, 0);
 					//TODO create task
+					createLidarTask();
 				}
 				mainHandle.state = MAIN_MOUSE;
 				break;
@@ -124,6 +147,14 @@ void mainTask(void) {
 	}
 }
 
+/**
+ * @brief Creates and initializes the main task.
+ *
+ * This function creates and initializes the main task, which is responsible
+ * for managing the overall behavior of the system.
+ *
+ * @return Returns true if the task creation is successful; otherwise, returns false.
+ */
 uint8_t createMainTask(void) {
 	if (xTaskCreate(mainTask, "Main", TASK_MAIN_STACK_DEPTH, NULL, TASK_MAIN_PRIORITY, &h_task_main) != pdPASS) {
 		LOG_RTOS_ERROR("Error creating task Main");

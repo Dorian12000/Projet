@@ -24,16 +24,17 @@
 #include <string.h>
 #include <math.h>
 
-#include "logger.h"
-#include "types.h"
+#include "../Inc/logger.h"
+#include "../Inc/types.h"
 
-#include "lidarTask.h"
-#include "drv_lidar.h"
+#include "../Inc/lidarTask.h"
+#include "../Inc/drv_lidar.h"
 
 #define RAYON 0.0637 //rayon du lidar en m
 
 static lidar_t lidar;
 static SemaphoreHandle_t sem_uart_read = NULL;
+static position_t robotPosition = {0, 0};
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance == USART1)
@@ -83,6 +84,18 @@ static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, ui
  */
 static inline HAL_StatusTypeDef LidarUartRx(uint8_t *p_data, uint16_t size) {
 	return HAL_UART_Receive_DMA(&huart1, p_data, size);
+}
+
+/**
+ * @brief Clears the nearest robot position.
+ *
+ * This function resets the angle and distance of the nearest robot position.
+ * After calling this function, the robot's angle will be set to 0, and the
+ * distance will be set to 0.
+ */
+static void clearNearestRobotPosition(void) {
+	robotPosition.angle = 0;
+	robotPosition.distance = 0;
 }
 
 /**
@@ -283,6 +296,17 @@ returncode_t LidarHealthStatus(lidar_healthStatus_t *healthStatus) {
 	return success;
 }
 
+/**
+ * @brief Restarts the LIDAR device.
+ *
+ * This function sends a restart command to the LIDAR device over UART and
+ * checks the transmission status. If the transmission is successful, the
+ * function returns success; otherwise, it returns transmission_failed.
+ *
+ * @return Return code indicating the success or failure of the LIDAR restart.
+ *         - success: The LIDAR restart command was successfully transmitted.
+ *         - transmission_failed: An error occurred during the transmission.
+ */
 returncode_t lidarRestart(void) {
 	LOG_LIDAR_ENTER();
 	HAL_StatusTypeDef status;
@@ -295,6 +319,17 @@ returncode_t lidarRestart(void) {
 	return success;
 }
 
+/**
+ * @brief Check the checksum (CS) of lidar scan data.
+ *
+ * This function calculates the checksum based on the provided lidar scan data
+ * and compares it with the checksum value in the data. If the calculated
+ * checksum matches the one in the data, the function returns true; otherwise,
+ * it returns false.
+ *
+ * @param lidarData Pointer to the lidar scan data structure.
+ * @return Returns true if the checksum is valid, false otherwise.
+ */
 bool checkCS(lidar_scan_t *lidarData) {
 	uint16_t calculatedCS = ((lidarData->PH[0] << 8) + lidarData->PH[1])^((lidarData->FSA[0] << 8) + lidarData->FSA[1]);
 	for (int i = 0; i < lidarData->LSN; i += 2) {
@@ -309,7 +344,17 @@ bool checkCS(lidar_scan_t *lidarData) {
 	}
 }
 
-returncode_t convertSample(lidar_scan_t *lidarData) { //TODO
+/**
+ * @brief Converts lidar scan data to distance and angle values.
+ *
+ * This function takes lidar scan data and converts it into distance and angle
+ * values. The calculated values are then stored in the global position array
+ * of the lidar structure.
+ *
+ * @param lidarData Pointer to the lidar scan data structure.
+ * @return Returns success if the conversion is successful.
+ */
+returncode_t convertSample(lidar_scan_t *lidarData) {
 	/******************** convert distance ***********************/
 	uint16_t sampleSize = lidarData->LSN/Si_SIZE;
 	//uint16_t distance[sampleSize];
@@ -344,62 +389,75 @@ returncode_t convertSample(lidar_scan_t *lidarData) { //TODO
 	memcpy(lidar.position, position, sampleSize);
 	return success;
 }
-/*
-returncode_t calculateOptimalDirection(void) {
-	double sumDistance = 0.0;
-    double avgAngle = 0.0;
 
-    // Calculez la somme des distances et des angles de tous les obstacles
-    for (int i = 0; i < numObstacles; i++) {
-        sumDistance += obstaclePolar[i].distance;
-        avgAngle += obstaclePolar[i].angle;
-    }
-
-    // Calculez la distance moyenne en divisant la somme par le nombre d'obstacles
-    double avgDistance = sumDistance / numObstacles;
-
-    // Calculez l'angle moyen en divisant la somme par le nombre d'obstacles
-    avgAngle /= numObstacles;
-
-    PolarCoordinate optimalPosition;
-    optimalPosition.distance = avgDistance;
-    optimalPosition.angle = avgAngle;
-
-    return optimalPosition;
-}*/
-/*
-int16_t *whereIsNearestRobot(void) {
-	int16_t robotPosition[2] = {0, 0}; // {distance, angle}
-	//TODO convert distance
-	//TODO for boucle
-
-	/*check if 5 samples form an arc of a circle*/
-/*	double expectedDistance = calculateExpectedDistance(convertedDistance[n], offsetAngle);
-	if((convertedDistance[n+1] < expectedDistance + 0.3) && (convertedDistance[n+1] > expectedDistance - 0.3) && (convertedDistance[n-1] < expectedDistance + 0.3) && (convertedDistance[n-1] > expectedDistance - 0.3)) {
-		expectedDistance = calculateExpectedDistance(convertedDistance[n], 2*offsetAngle);
-		if((convertedDistance[n+2] < expectedDistance + 0.3) && (convertedDistance[n+2] > expectedDistance - 0.3) && (convertedDistance[n-2] < expectedDistance + 0.3) && (convertedDistance[n-2] > expectedDistance - 0.3)) {
-			if(!robotPosition[0]) { // first robot detected
-				robotPosition[0] = convertedDistance[n];
-				robotPosition[1] = n;
-			}
-			else if(robotPosition[0] > convertedDistance[n]) { // a robot is closer than previous
-				robotPosition[0] = convertedDistance[n];
-				robotPosition[1] = n;
+/**
+ * @brief Determines the position of the nearest robot based on lidar data.
+ *
+ * This function analyzes lidar data to determine the position of the nearest
+ * robot. It checks for patterns indicating the presence of a robot and updates
+ * the global robot position accordingly. Additionally, it resets the robot
+ * position if no update is received after 20 seconds.
+ *
+ * @return Pointer to the structure representing the position of the nearest robot.
+ */
+position_t *whereIsNearestRobot(void) {
+	/* reset nearest robot position if no update after 20s */ 
+	TimerHandle_t robotTimer = xTimerCreate("Other Robot Timer", pdMS_TO_TICKS(20000), pdFALSE, NULL, clearNearestRobotPosition);
+	uint8_t offsetAngle = lidar.position[1].angle - lidar.position[0].angle;
+	for(int n = 0; n < strlen(lidar.position); n++)
+	{
+		/*check if 5 samples form an arc of a circle*/
+		double expectedDistance = calculateExpectedDistance(lidar.position[n].distance, offsetAngle);
+		if((lidar.position[n+1].distance < expectedDistance + 0.3) && (lidar.position[n+1].distance > expectedDistance - 0.3) && (lidar.position[n-1].distance < expectedDistance + 0.3) && (lidar.position[n-1].distance > expectedDistance - 0.3)) {
+			expectedDistance = calculateExpectedDistance(lidar.position[n].distance, 2*offsetAngle);
+			if((lidar.position[n+2].distance < expectedDistance + 0.3) && (lidar.position[n+2].distance > expectedDistance - 0.3) && (lidar.position[n-2].distance < expectedDistance + 0.3) && (lidar.position[n-2].distance > expectedDistance - 0.3)) {
+				if(!robotPosition.distance) { // first robot detected
+					xTimerStart(robotTimer, 0);
+					robotPosition.distance = lidar.position[n].distance;
+					robotPosition.angle = n;
+				}
+				else if(robotPosition.distance > lidar.position[n].distance) { // a robot is closer than previous
+					xTimerReset(robotTimer, 0);
+					robotPosition.distance = lidar.position[n].distance;
+					robotPosition.angle = n;
+				}
 			}
 		}
 	}
-	// end for
-	return robotPosition;
-}*/
-/*
+	return &robotPosition;
+}
+
+/**
+ * @brief Calculates the expected distance for a point with angular displacement.
+ *
+ * This function calculates the expected distance for a point given its initial
+ * distance and an angular displacement. The calculation is based on the
+ * law of cosines, and the result represents the distance to the point after
+ * applying the angular displacement.
+ *
+ * @param distanceInitiale Initial distance to the point.
+ * @param angleDecalage Angular displacement in degrees.
+ * @return The calculated distance after applying the angular displacement.
+ */
 double calculateExpectedDistance(double distanceInitiale, double angleDecalage) {
-    double angleEnRadians = angleDecalage * M_PI / 180.0; // Conversion de l'angle en radians, car les fonctions trigonométriques en C utilisent des radians
+    double angleEnRadians = angleDecalage * 3.14 / 180.0; // Conversion de l'angle en radians, car les fonctions trigonométriques en C utilisent des radians
     double nouvelleDistance = sqrt(pow(distanceInitiale, 2) + pow(RAYON, 2) - 
 								2 * distanceInitiale * RAYON * cos(angleEnRadians));// Calcul de la distance à laquelle devrait etre le prochain point pour etre un robot
 																					// en utilisant le théorème des cosinus
 	return nouvelleDistance;
-}*/
+}
 
+/**
+ * @brief Retrieves lidar scan data from the LIDAR device.
+ *
+ * This function reads raw lidar scan data from the LIDAR device through UART
+ * and processes it to extract relevant information, such as headers, angles,
+ * distances, and checksum. The extracted data is then stored in the provided
+ * lidar scan data structure.
+ *
+ * @param lidarScanData Pointer to the lidar scan data structure where the data will be stored.
+ * @return Returns success if the operation is successful; otherwise, returns an error code.
+ */
 returncode_t getLidarScanData(lidar_scan_t *lidarScanData) {
 	HAL_StatusTypeDef status = 0;
 	int size = 0;

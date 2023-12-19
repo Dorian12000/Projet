@@ -17,7 +17,7 @@
 #include "usart.h"
 #include "tim.h"
 #include "gpio.h"
-#include "log/types.h"
+#include "types.h"
 /***************************************commands**************************************/
 #define LIDAR_START 				0xA55A
 #define LIDAR_SCAN_START 			0xA560
@@ -109,5 +109,7 @@ returncode_t lidarRestart(void);
 
 bool checkCS(lidar_scan_t *lidarData);
 returncode_t convertSample(lidar_scan_t *lidarData);
+position_t *whereIsNearestRobot(void);
+double calculateExpectedDistance(double distanceInitiale, double angleDecalage);
 returncode_t getLidarScanData(lidar_scan_t *lidarScanData);
 

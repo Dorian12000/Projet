@@ -15,11 +15,11 @@
 
 #include "main.h"
 #include "cmsis_os.h"
-#include "drv_lidar.h"
-#include "logger.h"
-#include "types.h"
+#include "../Inc/drv_lidar.h"
+#include "../Inc/logger.h"
+#include "../Inc/types.h"
 
-#include "lidarTask.h"
+#include "../Inc/lidarTask.h"
 
 #define TASK_LIDAR_STACK_DEPTH 512
 #define TASK_LIDAR_PRIORITY 1
@@ -46,6 +46,13 @@ uint8_t isLidarScanning(void) {
 	return (lidarHandle.state == LIDAR_SCANNING);
 }
 
+/**
+ * @brief Sets the state of the LIDAR device.
+ *
+ * This function updates the state of the LIDAR device to the specified state.
+ *
+ * @param state The new state to set for the LIDAR device.
+ */
 void setLidarState(lidarState_t state) {
 	lidarHandle.state = state;
 }
@@ -119,10 +126,11 @@ TaskFunction_t lidarTask(void) {
 				//}
 				/*
 				if(robotState() == CAT) {
-					findMousePosition();
+					position_t *position = whereIsNearestRobot(); // TODO
+					
 				}
 				else {
-					calculateOptimalDirection();
+					calculateOptimalDirection(); // TODO
 				}
 				*/
 				//osDelay(1000);
