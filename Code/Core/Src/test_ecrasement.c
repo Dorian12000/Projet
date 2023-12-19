@@ -1,2 +1,0 @@
-^reklzlmrkezm
-Salut LAKSAN

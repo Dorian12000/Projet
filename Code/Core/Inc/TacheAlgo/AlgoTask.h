@@ -19,14 +19,12 @@
 #include "gpio.h"
 #include "log/types.h"
 #include "lidarTask.h"
+#include "mainTask.h"
+#include "driv_lidar.h"
 
-//Les états possibles
-typedef enum {
-	ATTENTE,
-	SOURIS,
-	CHAT,
-	STOP
-}algoState_t;
+
+
+
 void ConfigAlgoState(algoState_t state);
 
 

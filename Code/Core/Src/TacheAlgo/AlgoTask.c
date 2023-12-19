@@ -13,47 +13,33 @@
  *
  **/
 
-
-// TODO faire les fonctions callbacks du bumper
-// Envoyer une notifications pour savoir si c'est une souris ou un chat
 #include "AlgoTask.h"
-typedef struct {
-	AlgoState_t state;
-	AlgoState_t lastState;
-	TimerHandle_t timer;
-}algoHandle_t;
 
-algoHandle_t algoHandle;
 
-void ConfigAlgoState(algoState_t state){
-	algoHandle_t state = state
-}
-typedef enum {
-	ATTENTE,
-	SOURIS,
-	CHAT,
-	STOP
-}algoState_t;
-
-TaskFunction_t mouse_cat_AlgoTask(void) {
-
-	returncode_t status;
-	lidar_devEUI_t devEUI;
+TaskFunction_t AlgoTask(void) {
+	mainState_t robotState;
 	lidar_scan_t lidarScanData;
-	lidar_healthStatus_t healthStatus;
-	//TODO  la distance du lidar
-	status = getLidarScanData(&lidarScanData);
+	convertSample(&lidarScanData);
+	robotState = getMainState();
+
+	if (robotState = MAIN_CAT)
+	{
+
+	}
+	if (robotState = MAIN_MOUSE)
+	{
+		//TODO Recuperer les distances
+
+		//TODO Choisir la distance la plus longue
 
 
+		//TODO Diriger le robot
+	}
+	else {
 
+		printf("The state doesn't match");
 
-
-	//TODO calculer la distance la plus éloigné
-
-
-
-	//TODO Renvoyer position pour s'échapper du robot
-
+	}
 
 
 }
