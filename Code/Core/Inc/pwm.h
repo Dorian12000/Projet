@@ -11,16 +11,17 @@
 #include <stdint.h>
 #include "tim.h"
 
+#define MAX_DUTY_CYCLE_MOTOR 2560
+#define MIN_DUTY_CYCLE_MOTOR 0
+
 typedef struct PWM_struct
 {
 	TIM_HandleTypeDef *timer;
 	uint32_t channel;
-	float duty_cycle; // 0 - 1
 }PWM;
 
-void initPwm(PWM *pwm);
-void setPwmDutyCycle(PWM *pwm, float duty_cycle);
-void stopPwm(PWM *pwm);
-
+#define START_PWM(pwm) HAL_TIM_PWM_Start((pwm).timer, (pwm).channel)
+#define STOP_PWM(pwm)  HAL_TIM_PWM_Stop((pwm).timer, (pwm).channel)
+void setPwmDutyCycle(PWM *pwm, uint8_t duty_cycle);
 
 #endif /* INC_PWM_H_ */

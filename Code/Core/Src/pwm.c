@@ -1,36 +1,24 @@
 /*
  * pwm.c
  *
- *  Created on: Oct 5, 2023
+ *  Created on: Dec 1, 2023
  *      Author: gourd
  */
 
 #include "pwm.h"
 
-void initPwm(PWM *pwm)
+void setPwmDutyCycle(PWM *pwm, uint8_t duty_cycle)
 {
-	HAL_TIM_PWM_Start(pwm->timer, pwm->channel);
-	setPwmDutyCycle(pwm, 0.0f);
-}
+	uint16_t duty_cycle16 = duty_cycle * MAX_DUTY_CYCLE_MOTOR / 100;
 
-void stopPwm(PWM *pwm)
-{
-	HAL_TIM_PWM_Stop(pwm->timer, pwm->channel);
-}
-
-void setPwmDutyCycle(PWM *pwm, float duty_cycle)
-{
-    if (duty_cycle < 0.0f)
+    if (duty_cycle16 < MIN_DUTY_CYCLE_MOTOR)
     {
-        duty_cycle = 0.0f;
+    	duty_cycle16 = MIN_DUTY_CYCLE_MOTOR;
     }
-    else if (duty_cycle > 1.0f)
+    else if (duty_cycle16 > MAX_DUTY_CYCLE_MOTOR)
     {
-        duty_cycle = 1.0f;
+    	duty_cycle16 = MAX_DUTY_CYCLE_MOTOR;
     }
 
-    uint16_t period = pwm->timer->Init.Period;
-    uint16_t ccr_value = (uint16_t)(duty_cycle * period);
-
-    __HAL_TIM_SET_COMPARE(pwm->timer, pwm->channel, ccr_value);
+    __HAL_TIM_SET_COMPARE(pwm->timer, pwm->channel, duty_cycle16);
 }

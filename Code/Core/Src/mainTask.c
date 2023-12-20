@@ -13,14 +13,15 @@
  *
  **/
 
+#include "mainTask.h"
+
 #include "main.h"
 #include "cmsis_os.h"
-#include "../../dev_lidar/Inc/logger.h"
-#include "../../dev_lidar/Inc/types.h"
+#include "logger.h"
+#include "types.h"
 #include <limits.h>
-#include "../../dev_lidar/Inc/lidarTask.h"
-
-#include "mainTask.h"
+#include "lidarTask.h"
+#include "task_motor.h"
 
 #define TASK_MAIN_STACK_DEPTH 512
 #define TASK_MAIN_PRIORITY 99
@@ -86,7 +87,7 @@ void setMainState(void) {
  * current state. Additionally, it toggles LEDs, processes notifications, and
  * handles timeouts using a timer.
  */
-void mainTask(void) {
+void mainTask(void *param) {
 	returncode_t status;
 	uint32_t ulNotifiedValue;
 

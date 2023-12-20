@@ -25,8 +25,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "../../dev_lidar/Inc/logger.h"
-#include "../../dev_lidar/Inc/types.h"
+#include <stdio.h>
+
+#include "logger.h"
+#include "types.h"
+#include "mainTask.h"
+#include "pid.h"
+#include "pwm.h"
+#include "motor_drv.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,6 +53,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+// PWM MOTORS
+PWM pwm_rev_left  = {.timer = &htim16, .channel = TIM_CHANNEL_1};
+PWM pwm_fwd_left  = {.timer = &htim17, .channel = TIM_CHANNEL_1};
+PWM pwm_rev_right = {.timer = &htim15, .channel = TIM_CHANNEL_1};
+PWM pwm_fwd_right = {.timer = &htim15, .channel = TIM_CHANNEL_2};
+// PWM LIDAR
+PWM pwm_lidar     = {.timer = &htim14, .channel = TIM_CHANNEL_1};
 
 /* USER CODE END PV */
 
@@ -59,8 +72,10 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int __io_putchar(int ch) {
-	HAL_UART_Transmit(&huart2, &ch, 1, 10);
+int __io_putchar(int chr)
+{
+	HAL_UART_Transmit(&huart2, (uint8_t*)&chr, 1, HAL_MAX_DELAY);
+	return chr;
 }
 /* USER CODE END 0 */
 
@@ -103,13 +118,39 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	printf("================== boot ================\n");
 
-	if(HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1) != HAL_OK)
+	// TIMER PWM LIDAR
+	if(START_PWM(pwm_lidar) != HAL_OK)
 	{
 		printf("ERROR: PWM Start LIDAR\r\n");
 		Error_Handler();
-
 	}
-	//__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1 ,1000);
+
+	// TIMER PWM MOTORS
+	if((START_PWM(pwm_rev_left) != HAL_OK) || (START_PWM(pwm_fwd_left) != HAL_OK) ||
+			(START_PWM(pwm_rev_right) != HAL_OK) || (START_PWM(pwm_fwd_right) != HAL_OK))
+	{
+		printf("ERROR: PWM Start MOTORS\r\n");
+		Error_Handler();
+	}
+
+	// TIMER ENCODEUR MOTORS
+	if((HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL) != HAL_OK) ||
+			(HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL) != HAL_OK))
+	{
+		printf("ERROR: ENCODEUR Start MOTORS\r\n");
+		Error_Handler();
+	}
+
+	// PID struct init
+	initPID(&pid_motor_left, 1.0, 1.0, 1.0, TE);
+	initPID(&pid_motor_right, 1.0, 1.0, 1.0, TE);
+
+	// Motor struct init
+	initMotor(&motor_left, &pwm_fwd_left, &pwm_rev_left, &htim3);
+	initMotor(&motor_right, &pwm_fwd_right, &pwm_rev_right, &htim1);
+
+	setPwmDutyCycle(&pwm_lidar, 85);
+	//__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1 ,85);
 
 	bool ret = createMainTask();
 

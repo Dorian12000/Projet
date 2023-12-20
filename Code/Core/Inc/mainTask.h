@@ -15,6 +15,8 @@
 #ifndef INC_MAIN_TASK_H_
 #define INC_MAIN_TASK_H_
 
+#include <stdint.h>
+
 typedef enum {
 	MAIN_INIT,
 	MAIN_CAT,
@@ -35,6 +37,6 @@ mainState_t getMainState(void);
 void setMainState(void);
 
 uint8_t createMainTask(void);
-void mainTask(void);
+void mainTask(void *param);
 
 #endif
