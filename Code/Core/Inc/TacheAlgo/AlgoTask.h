@@ -25,6 +25,17 @@
 
 
 
+<<<<<<< HEAD
+=======
+//Les états possibles
+typedef enum {
+	WAITING,
+	MOUSE,
+	CAT,
+	STOP,
+	ERROR
+}algoState_t;
+>>>>>>> 8c4ad9ef68b97d3093480e5f02b79854a4f53d2a
 void ConfigAlgoState(algoState_t state);
 
 
