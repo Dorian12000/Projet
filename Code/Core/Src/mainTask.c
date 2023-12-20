@@ -136,8 +136,8 @@ void mainTask(void) {
 		}
 		if(xTaskNotifyWait(0, ULONG_MAX, &ulNotifiedValue, 5000) == pdTRUE) {
 			setMainState();
-			HAL_GPIO_TogglePin(LED_B_GPIO_Port, LED_B_Pin);
-			HAL_GPIO_TogglePin(LED_R_GPIO_Port, LED_R_Pin);
+//			HAL_GPIO_TogglePin(LED_B_GPIO_Port, LED_B_Pin);
+//			HAL_GPIO_TogglePin(LED_R_GPIO_Port, LED_R_Pin);
 			//xTaskNotify(lidarHandle, &ulNotifiedValue, eSetBits); //TODO notify side that has beed affected
 			taskENTER_CRITICAL();
 			vTaskDelay(2000);

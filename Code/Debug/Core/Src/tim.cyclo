@@ -7,5 +7,5 @@
 ../Core/Src/tim.c:357:6:HAL_TIM_Encoder_MspInit	3
 ../Core/Src/tim.c:411:6:HAL_TIM_Base_MspInit	5
 ../Core/Src/tim.c:459:6:HAL_TIM_MspPostInit	5
-../Core/Src/tim.c:558:6:HAL_TIM_Encoder_MspDeInit	3
-../Core/Src/tim.c:599:6:HAL_TIM_Base_MspDeInit	5
+../Core/Src/tim.c:550:6:HAL_TIM_Encoder_MspDeInit	3
+../Core/Src/tim.c:591:6:HAL_TIM_Base_MspDeInit	5

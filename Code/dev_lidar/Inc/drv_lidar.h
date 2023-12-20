@@ -49,10 +49,10 @@
 #define HEALTH_STATUS_SIZE		(STATUS_CODE_SIZE + ERROR_CODE_SIZE)
 
 
-#define LIDAR_MOTOR_ENABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_SET)
-#define LIDAR_MOTOR_DISABLE()	HAL_GPIO_WritePin(M_EN_GPIO_Port, M_EN_Pin, GPIO_PIN_RESET)
-#define LIDAR_DEV_ENABLE()	HAL_GPIO_WritePin(DEV_EN_GPIO_Port, DEV_EN_Pin, GPIO_PIN_SET)
-#define LIDAR_DEV_DISABLE()	HAL_GPIO_WritePin(DEV_EN_GPIO_Port, DEV_EN_Pin, GPIO_PIN_RESET)
+#define LIDAR_MOTOR_ENABLE()	HAL_GPIO_WritePin(LIDAR_M_EN_GPIO_Port, LIDAR_M_EN_Pin, GPIO_PIN_SET)
+#define LIDAR_MOTOR_DISABLE()	HAL_GPIO_WritePin(LIDAR_M_EN_GPIO_Port, LIDAR_M_EN_Pin, GPIO_PIN_RESET)
+#define LIDAR_DEV_ENABLE()	HAL_GPIO_WritePin(LIDAR_DEV_EN_GPIO_Port, LIDAR_DEV_EN_Pin, GPIO_PIN_SET)
+#define LIDAR_DEV_DISABLE()	HAL_GPIO_WritePin(LIDAR_DEV_EN_GPIO_Port, LIDAR_DEV_EN_Pin, GPIO_PIN_RESET)
 
 typedef int (* uart_tx_t)(uint8_t *address, uint8_t *p_data, uint16_t size);
 typedef int (* uart_rx_t)(uint8_t *p_data, uint16_t size);

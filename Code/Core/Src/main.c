@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "adc.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -61,7 +60,7 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int __io_putchar(int ch) {
-	HAL_UART_Transmit(&huart1,&ch,1,10);
+	HAL_UART_Transmit(&huart2, &ch, 1, 10);
 }
 /* USER CODE END 0 */
 
@@ -93,19 +92,25 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ADC1_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_TIM14_Init();
   MX_TIM15_Init();
   MX_TIM16_Init();
   MX_TIM17_Init();
-  MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_USART4_UART_Init();
   /* USER CODE BEGIN 2 */
 	printf("================== boot ================\n");
-	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
-	__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1 ,1000);
+
+	if(HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1) != HAL_OK)
+	{
+		printf("ERROR: PWM Start LIDAR\r\n");
+		Error_Handler();
+
+	}
+	//__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1 ,1000);
+
 	bool ret = createMainTask();
 
   /* USER CODE END 2 */

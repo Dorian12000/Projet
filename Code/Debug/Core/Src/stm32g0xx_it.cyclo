@@ -1,5 +1,3 @@
 ../Core/Src/stm32g0xx_it.c:70:6:NMI_Handler	1
 ../Core/Src/stm32g0xx_it.c:85:6:HardFault_Handler	1
-../Core/Src/stm32g0xx_it.c:107:6:EXTI0_1_IRQHandler	1
-../Core/Src/stm32g0xx_it.c:121:6:EXTI4_15_IRQHandler	1
-../Core/Src/stm32g0xx_it.c:139:6:TIM6_IRQHandler	1
+../Core/Src/stm32g0xx_it.c:107:6:TIM6_IRQHandler	1
