@@ -6,25 +6,12 @@
  */
 
 #include "task_motor.h"
+#include "mainTask.h"
+#include "drv_lidar.h"
 #include "FreeRTOS.h"
 #include "main.h"
 #include <stdio.h>
 #include <limits.h>
-
-typedef struct position_s{
-	float angle;
-	uint16_t distance;
-}position_t;
-
-typedef enum {
-	BUMPER_F_NOTIFY,
-	BUMPER_B_NOTIFY,
-	BUMPER_R_NOTIFY,
-	BUMPER_L_NOTIFY,
-	BORDER_F_NOTIFY,
-	BORDER_B_NOTIFY,
-}ISRnotify_t;
-
 
 #define STACK_SIZE_POSITION_MOTOR 1000
 #define TASK_PRIORITY_POSITION_MOTOR 90
@@ -88,7 +75,6 @@ void vTaskPositionMotor(void *param)
 					distanceToCommand(distance, angle);
 				}
 			}
-
 		}
 	}
 }

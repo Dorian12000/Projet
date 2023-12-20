@@ -12,7 +12,7 @@
 "./Core/Src/sysmem.o"
 "./Core/Src/system_stm32g0xx.o"
 "./Core/Src/task_asserv.o"
-"./Core/Src/task_motor.o"
+"./Core/Src/task_cmd_motor.o"
 "./Core/Src/tim.o"
 "./Core/Src/usart.o"
 "./Core/Startup/startup_stm32g070rbtx.o"

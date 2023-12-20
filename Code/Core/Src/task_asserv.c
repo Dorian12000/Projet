@@ -53,7 +53,6 @@ void vTaskAsservMotor(void *param)
 	uint32_t last_pos_motor_left  = READ_MOTOR_ENCODER(motor_left);
 	uint32_t last_pos_motor_right = READ_MOTOR_ENCODER(motor_right);
 
-	// Déclencher en interruption ou software timer ?
 	for(;;)
 	{
 		// Commande pour les moteur
@@ -68,7 +67,7 @@ void vTaskAsservMotor(void *param)
 
 		// Lire vitesse des moteurs
 		float speed_mes_motor_left  = getSpeed(&motor_left, last_pos_motor_left, current_pos_motor_left, TE);
-		float speed_mes_motor_right  = getSpeed(&motor_right, last_pos_motor_right, current_pos_motor_right, TE);
+		float speed_mes_motor_right = getSpeed(&motor_right, last_pos_motor_right, current_pos_motor_right, TE);
 
 		// Erreur vitesse entre commande et mesure pour les deux pid
 		error(&pid_motor_left, speed_cmd_motor_left, speed_mes_motor_left);
@@ -78,12 +77,9 @@ void vTaskAsservMotor(void *param)
 		float new_speed_motor_left  = correcteur(&pid_motor_left);
 		float new_speed_motor_right = correcteur(&pid_motor_left);
 
-		// Générer les pwm des moteurs
-		if(command_motor_left.dir == FWD)
-		{
-			setMotorSpeed(&motor_left, new_speed_motor_left, dir_cmd_motor_left);
-			setMotorSpeed(&motor_right, new_speed_motor_right, dir_cmd_motor_right);
-		}
+		// Envoyer la commande au driver de moteur pour la génération des pwm
+		setMotorSpeed(&motor_left, (uint8_t)new_speed_motor_left, dir_cmd_motor_left);
+		setMotorSpeed(&motor_right, (uint8_t)new_speed_motor_right, dir_cmd_motor_right);
 
 		// Mettre a jour la dernière position des encodeurs
 		last_pos_motor_left  = current_pos_motor_left;
