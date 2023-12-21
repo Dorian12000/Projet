@@ -23,14 +23,14 @@ void asservMotorTaskCreate(void)
 {
 	if(xTaskCreate(vTaskAsservMotor, "Motor Asserv Task", STACK_SIZE_ASSERV_MOTOR, NULL, TASK_PRIORITY_ASSERV_MOTOR, &asserv_motor_task_h) != pdPASS)
 	{
-		printf("Error asserv motor task create\r\n");
+		printf("ERROR: Asserv Motor Task Creation\r\n");
 		Error_Handler();
 	}
 
 	timer_asserv_h = xTimerCreate("Asserv Timer", pdMS_TO_TICKS(TE), pdTRUE, NULL, vTaskAsservMotor);
 	if(timer_asserv_h == NULL)
 	{
-		printf("Error Asserv Timer Creation\r\n");
+		printf("EROR: Asserv Timer Creation\r\n");
 		Error_Handler();
 	}
 
@@ -41,10 +41,12 @@ void asservMotorTaskCreate(void)
 	}
 }
 
+
 TaskHandle_t *getAsservMotorTaskHandle(void)
 {
 	return &asserv_motor_task_h;
 }
+
 
 void vTaskAsservMotor(void *param)
 {
@@ -66,8 +68,8 @@ void vTaskAsservMotor(void *param)
 		current_pos_motor_right = READ_MOTOR_ENCODER(motor_right);
 
 		// Lire vitesse des moteurs
-		float speed_mes_motor_left  = getSpeed(&motor_left, last_pos_motor_left, current_pos_motor_left, TE);
-		float speed_mes_motor_right = getSpeed(&motor_right, last_pos_motor_right, current_pos_motor_right, TE);
+		float speed_mes_motor_left  = getSpeed(last_pos_motor_left, current_pos_motor_left, TE);
+		float speed_mes_motor_right = getSpeed(last_pos_motor_right, current_pos_motor_right, TE);
 
 		// Erreur vitesse entre commande et mesure pour les deux pid
 		error(&pid_motor_left, speed_cmd_motor_left, speed_mes_motor_left);

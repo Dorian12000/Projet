@@ -41,13 +41,14 @@ TaskHandle_t *getPositionMotorTaskHandle(void)
 void vTaskPositionMotor(void *param)
 {
 	uint32_t notify_value;
+	position_t position_to_go = {19.0, 10};
 
 
 	for(;;)
 	{
 		if(xTaskNotifyWait(0, ULONG_MAX, &notify_value, portMAX_DELAY) == pdTRUE)
 		{
-			if(notify_value == BORDER_F_NOTIFY || notify_value == BORDER_B_NOTIFY) // Notification bordure
+			if(notify_value == BORDER_F_NOTIFY || notify_value == BORDER_B_NOTIFY) // Notification ISR capteurs bordure
 			{
 				// Gauche stop, Droit stop
 				command_motor_left.speed  = 0;
@@ -58,7 +59,8 @@ void vTaskPositionMotor(void *param)
 			else // Nouvelle notification de position
 			{
 				// TODO : Choper la structure position_t du lidar
-				position_t position_to_go = {19.0, 10};
+					// position_to_go = getPositionLidar();
+
 				float angle = position_to_go.angle;
 				uint16_t distance = position_to_go.distance;
 
@@ -79,43 +81,44 @@ void vTaskPositionMotor(void *param)
 	}
 }
 
-
+// Gère les virage du robot
 void angleToCommand(float angle)
 {
 	if(angle > 0 && angle <= 90)
 	{
-		// Gauche en avant, Droit stop
+		// Gauche en avant, Droit moins vite
 		command_motor_left.speed  = 100;
 		command_motor_left.dir  = FWD;
-		command_motor_right.speed = 0;
-		command_motor_right.dir = STOP;
+		command_motor_right.speed = 20;
+		command_motor_right.dir = FWD;
 	}
 	else if(angle > 90 && angle <= 180)
 	{
-		// Gauche en arrière, Droit stop
+		// Gauche en arrière, Droit moins vite
 		command_motor_left.speed  = 100;
 		command_motor_left.dir  = REV;
-		command_motor_right.speed = 0;
-		command_motor_right.dir = STOP;
+		command_motor_right.speed = 20;
+		command_motor_right.dir = REV;
 	}
 	else if(angle > 180 && angle <= 270)
 	{
-		// Gauche stop, Droit en arrière
-		command_motor_left.speed  = 0;
-		command_motor_left.dir  = STOP;
+		// Gauche moins vite, Droit en arrière
+		command_motor_left.speed  = 20;
+		command_motor_left.dir  = REV;
 		command_motor_right.speed = 100;
 		command_motor_right.dir = REV;
 	}
 	else
 	{
-		// Gauche stop, Droit en avant
-		command_motor_left.speed  = 0;
-		command_motor_left.dir  = STOP;
+		// Gauche moins vite, Droit en avant
+		command_motor_left.speed  = 20;
+		command_motor_left.dir  = FWD;
 		command_motor_right.speed = 100;
 		command_motor_right.dir = FWD;
 	}
 }
 
+// Déplacement en ligne droite
 void distanceToCommand(uint16_t distance, float angle)
 {
 	if(angle == 180)

@@ -28,21 +28,21 @@ void initPID(PID *pid, float kp, float ki, float kd, float Te)
 	}
 }
 
-
+// Erreur entre la commande et la vitesse mesurée
 void error(PID *pid, uint8_t speed_cmd, float speed_mes)
 {
 	pid->inputs[pid->index] = speed_mes - speed_cmd;
-	//printf("Erreur = %f\r\n", inputs[pid->index]);
 }
 
+// Calcule la nouvelle commande de vitesse à appliquer au moteur : 0-100
 float correcteur(PID *pid)
 {
 	uint8_t idx = pid->index;
 
-	pid->outputs[idx] = pid->outputs[(idx + 2)%PID_ORDRE]
+	pid->outputs[idx] = pid->outputs[(idx + 2) % PID_ORDRE]
 				   + pid->b0 * pid->inputs[idx];
-//				   + pid->b1 * pid->inputs[(idx + 1)%PID_ORDRE]
-//				   + pid->b2 * pid->inputs[(idx + 2)%PID_ORDRE];
+//				   + pid->b1 * pid->inputs[(idx + 1) % PID_ORDRE]
+//				   + pid->b2 * pid->inputs[(idx + 2) % PID_ORDRE];
 
 	//printf("Sortie pid = %f\r\n", outputs[idx]);
 	pid->index = (idx + 1) % PID_ORDRE;

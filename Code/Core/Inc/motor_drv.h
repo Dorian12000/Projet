@@ -42,6 +42,6 @@ void setMotorSpeedFwd(h_motor_t *motor, uint8_t speed);
 void setMotorSpeedRev(h_motor_t *motor, uint8_t speed);
 void setMotorSpeed(h_motor_t *motor, uint8_t speed, h_motor_state dir);
 void stopMotor(h_motor_t *motor);
-float getSpeed(h_motor_t *motor, uint32_t enc_prev, uint32_t enc_curr, uint16_t time_ms);
+float getSpeed(uint32_t enc_prev, uint32_t enc_curr, uint16_t time_ms);
 
 #endif /* INC_MOTOR_DRV_H_ */

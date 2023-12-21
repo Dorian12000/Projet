@@ -149,7 +149,7 @@ int main(void)
 	initMotor(&motor_left, &pwm_fwd_left, &pwm_rev_left, &htim3);
 	initMotor(&motor_right, &pwm_fwd_right, &pwm_rev_right, &htim1);
 
-	setPwmDutyCycle(&pwm_lidar, 85);
+	setPwmDutyCycle(&pwm_lidar, 85, MAX_DUTY_CYCLE_LIDAR);
 	//__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1 ,85);
 
 	bool ret = createMainTask();
