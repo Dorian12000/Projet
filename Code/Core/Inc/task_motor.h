@@ -22,7 +22,7 @@ extern command_t command_motor_right;
 
 // Pour la tâche qui gère la commande pour le pid en fonction de la position
 void positionMotorTaskCreate(void);
-TaskHandle_t *getPositionMotorTaskHandle(void);
+TaskHandle_t getPositionMotorTaskHandle(void);
 void vTaskPositionMotor(void *param);
 
 void angleToCommand(float angle);
@@ -30,7 +30,7 @@ void distanceToCommand(uint16_t distance, float angle);
 
 // Pour la tâche d'asservissement
 void asservMotorTaskCreate(void);
-TaskHandle_t *getAsservMotorTaskHandle(void);
+TaskHandle_t getAsservMotorTaskHandle(void);
 void vTaskAsservMotor(void *param);
 
 

@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -107,6 +108,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_TIM14_Init();
@@ -142,14 +144,13 @@ int main(void)
 	}
 
 	// PID struct init
-	initPID(&pid_motor_left, 1.0, 1.0, 1.0, TE);
-	initPID(&pid_motor_right, 1.0, 1.0, 1.0, TE);
+	initPID(&pid_motor_left, 0.5, 1.0, 1.0, TE);
+	initPID(&pid_motor_right, 0.5, 1.0, 1.0, TE);
 
 	// Motor struct init
 	initMotor(&motor_left, &pwm_fwd_left, &pwm_rev_left, &htim3);
 	initMotor(&motor_right, &pwm_fwd_right, &pwm_rev_right, &htim1);
 
-	setPwmDutyCycle(&pwm_lidar, 85, MAX_DUTY_CYCLE_LIDAR);
 	//__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1 ,85);
 
 	bool ret = createMainTask();
@@ -193,10 +194,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
   RCC_OscInitStruct.PLL.PLLN = 8;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;

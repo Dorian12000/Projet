@@ -32,9 +32,9 @@ void positionMotorTaskCreate(void)
 }
 
 
-TaskHandle_t *getPositionMotorTaskHandle(void)
+TaskHandle_t getPositionMotorTaskHandle(void)
 {
-	return &position_motor_task_h;
+	return position_motor_task_h;
 }
 
 
@@ -48,7 +48,7 @@ void vTaskPositionMotor(void *param)
 	{
 		if(xTaskNotifyWait(0, ULONG_MAX, &notify_value, portMAX_DELAY) == pdTRUE)
 		{
-			if(notify_value == BORDER_F_NOTIFY || notify_value == BORDER_B_NOTIFY) // Notification ISR capteurs bordure
+			if(notify_value == BORDER_F_NOTIFY) // Notification ISR capteurs bordure
 			{
 				// Gauche stop, Droit stop
 				command_motor_left.speed  = 0;

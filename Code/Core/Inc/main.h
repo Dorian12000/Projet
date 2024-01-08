@@ -87,8 +87,10 @@ void Error_Handler(void);
 #define ML_FWD_GPIO_Port GPIOD
 #define BORDER_BACK_Pin GPIO_PIN_2
 #define BORDER_BACK_GPIO_Port GPIOD
+#define BORDER_BACK_EXTI_IRQn EXTI2_3_IRQn
 #define BORDER_FRONT_Pin GPIO_PIN_3
 #define BORDER_FRONT_GPIO_Port GPIOD
+#define BORDER_FRONT_EXTI_IRQn EXTI2_3_IRQn
 #define PC_TX_Pin GPIO_PIN_5
 #define PC_TX_GPIO_Port GPIOD
 #define PC_RX_Pin GPIO_PIN_6

@@ -63,7 +63,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  */
 static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, uint16_t size) {
 	HAL_StatusTypeDef status;
-	status = HAL_UART_Transmit_DMA(&huart2, address, 2);
+	status = HAL_UART_Transmit_DMA(&huart4, address, 2);
 	return status;
 }
 
@@ -83,7 +83,7 @@ static inline HAL_StatusTypeDef LidarUarTx(uint8_t *address, uint8_t *p_data, ui
  * It uses DMA for efficient and non-blocking data reception.
  */
 static inline HAL_StatusTypeDef LidarUartRx(uint8_t *p_data, uint16_t size) {
-	return HAL_UART_Receive_DMA(&huart2, p_data, size);
+	return HAL_UART_Receive_DMA(&huart4, p_data, size);
 }
 
 /**
