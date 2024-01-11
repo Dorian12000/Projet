@@ -5,6 +5,7 @@
  * @brief          : Main program body
  ******************************************************************************
  * @attention
+ * Test des Bumpers / Bordure / Moteurs avec  FreeRTOS
  *
  * Copyright (c) 2023 STMicroelectronics.
  * All rights reserved.
