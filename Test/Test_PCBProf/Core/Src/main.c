@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -25,7 +25,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "motor_drv.h"
+#include "task_motor.h"
+#include "mainTask.h"
+#include "pwm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,7 +49,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+PWM pwm_rev_left  = {.timer = &htim16, .channel = TIM_CHANNEL_1};
+PWM pwm_fwd_left  = {.timer = &htim17, .channel = TIM_CHANNEL_1};
+PWM pwm_rev_right = {.timer = &htim15, .channel = TIM_CHANNEL_1};
+PWM pwm_fwd_right = {.timer = &htim15, .channel = TIM_CHANNEL_2};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,6 +70,43 @@ int __io_putchar(int chr)
 	return chr;
 }
 
+// Interruption pour les bumpers
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
+{
+	HAL_GPIO_TogglePin(GPIOB, LED_ORANGE_Pin);
+	if(GPIO_Pin == BUMPER0_Pin || GPIO_Pin == BUMPER1_Pin
+	   || GPIO_Pin == BUMPER2_Pin || GPIO_Pin == BUMPER3_Pin)
+	{
+		printf("Bumper\r\n");
+	}
+
+	//BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+//	if(GPIO_Pin == BUMPER_F_Pin) {
+//		//xTaskNotifyFromISR(h_task_main, BUMPER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken);
+//	} else if(GPIO_Pin == BUMPER_B_Pin) {
+//		//xTaskNotifyFromISR(h_task_main, BUMPER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+//	} else if(GPIO_Pin == BUMPER_R_Pin) {
+//		//xTaskNotifyFromISR(h_task_main, BUMPER_R_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+//	} else if(GPIO_Pin == BUMPER_L_Pin) {
+//		//xTaskNotifyFromISR(h_task_main, BUMPER_L_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+//	} else if(GPIO_Pin == BORDER_FRONT_Pin) {
+//		//xTaskNotifyFromISR(getPositionMotorTaskHandle(), BORDER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+//	} else if(GPIO_Pin == BORDER_BACK_Pin) {
+//		xTaskNotifyFromISR(getPositionMotorTaskHandle(), BORDER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
+//	}
+//	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+}
+
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == BORDER_BACK_Pin || GPIO_Pin == BORDER_FRONT_Pin)
+	{
+		printf("Bordure\r\n");
+//		stopMotor(&motor_left);
+//		stopMotor(&motor_right);
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -73,7 +116,6 @@ int __io_putchar(int chr)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -103,36 +145,47 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
-  HAL_TIM_Encoder_Start(&htim1,TIM_CHANNEL_ALL);
-  HAL_TIM_Encoder_Start(&htim3,TIM_CHANNEL_ALL);
 
+	if((START_PWM(pwm_rev_left) != HAL_OK) || (START_PWM(pwm_fwd_left) != HAL_OK) ||
+			(START_PWM(pwm_rev_right) != HAL_OK) || (START_PWM(pwm_fwd_right) != HAL_OK))
+	{
+		printf("ERROR: PWM Start MOTORS\r\n");
+		Error_Handler();
+	}
+	if((HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL) != HAL_OK) ||
+			(HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL) != HAL_OK))
+	{
+		printf("ERROR: ENCODEUR Start MOTORS\r\n");
+		Error_Handler();
+	}
+	// Motor struct init
+	initMotor(&motor_left, &pwm_fwd_left, &pwm_rev_left, &htim3);
+	initMotor(&motor_right, &pwm_fwd_right, &pwm_rev_right, &htim1);
+	//
+	setMotorSpeed(&motor_left, 50, FWD);
+	//setMotorSpeed(&motor_right, 50, FWD);
 
-  __HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_1,1000);
-  __HAL_TIM_SET_COMPARE(&htim16,TIM_CHANNEL_1,1000);
+	printf("HAL OK\r\n");
 
-  HAL_Delay(5000);
-  HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Stop(&htim16, TIM_CHANNEL_1);
+	//createMainTask();
+	//asservMotorTaskCreate();
+	uint32_t prevEncoder =READ_MOTOR_ENCODER(motor_left);
+	uint32_t currentEncoder = 0;
+	uint16_t time = 5000;
 
-  HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
+	while(1)
+	{
+		printf("while ok \r\n");
+		HAL_Delay(time);
+		currentEncoder = READ_MOTOR_ENCODER(motor_left);
+		printf("current Encoder =%d, Last Encoder =%d \n\r",currentEncoder, prevEncoder);
 
-  __HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2,1000);
-  __HAL_TIM_SET_COMPARE(&htim17,TIM_CHANNEL_1,1000);
+		int speed ;
+		speed =getSpeed(prevEncoder, currentEncoder, time);
+		printf("speed=%d \n\r",speed);
+		prevEncoder = currentEncoder;
+	}
 
-  HAL_Delay(5000);
-  HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Stop(&htim17, TIM_CHANNEL_1);
-
-
-
-
-
-  HAL_GPIO_WritePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin, 1);
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, 1);
-  HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, 1);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -144,13 +197,18 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+	while (1)
+	{
+
+
+
+
+
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+	}
   /* USER CODE END 3 */
 }
 
@@ -170,10 +228,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
   RCC_OscInitStruct.PLL.PLLN = 8;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
@@ -229,11 +289,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1)
+	{
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -248,7 +308,7 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
+	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }

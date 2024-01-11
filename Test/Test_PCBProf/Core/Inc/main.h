@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -75,24 +75,42 @@ void Error_Handler(void);
 #define LED_GREEN_GPIO_Port GPIOB
 #define ML_FWD_Pin GPIO_PIN_14
 #define ML_FWD_GPIO_Port GPIOB
+#define ML_REV_Pin GPIO_PIN_15
+#define ML_REV_GPIO_Port GPIOB
+#define MR_ENC_B_Pin GPIO_PIN_8
+#define MR_ENC_B_GPIO_Port GPIOA
+#define MR_ENC_A_Pin GPIO_PIN_9
+#define MR_ENC_A_GPIO_Port GPIOA
+#define ML_ENC_B_Pin GPIO_PIN_6
+#define ML_ENC_B_GPIO_Port GPIOC
+#define ML_ENC_A_Pin GPIO_PIN_7
+#define ML_ENC_A_GPIO_Port GPIOC
 #define MR_FWD_Pin GPIO_PIN_0
 #define MR_FWD_GPIO_Port GPIOD
+#define MR_REV_Pin GPIO_PIN_1
+#define MR_REV_GPIO_Port GPIOD
 #define BORDER_BACK_Pin GPIO_PIN_2
 #define BORDER_BACK_GPIO_Port GPIOD
+#define BORDER_BACK_EXTI_IRQn EXTI2_3_IRQn
 #define BORDER_FRONT_Pin GPIO_PIN_3
 #define BORDER_FRONT_GPIO_Port GPIOD
+#define BORDER_FRONT_EXTI_IRQn EXTI2_3_IRQn
 #define ST_LINK_TX_Pin GPIO_PIN_5
 #define ST_LINK_TX_GPIO_Port GPIOD
 #define ST_LINK_RX_Pin GPIO_PIN_6
 #define ST_LINK_RX_GPIO_Port GPIOD
 #define BUMPER3_Pin GPIO_PIN_6
 #define BUMPER3_GPIO_Port GPIOB
+#define BUMPER3_EXTI_IRQn EXTI4_15_IRQn
 #define BUMPER2_Pin GPIO_PIN_7
 #define BUMPER2_GPIO_Port GPIOB
+#define BUMPER2_EXTI_IRQn EXTI4_15_IRQn
 #define BUMPER1_Pin GPIO_PIN_8
 #define BUMPER1_GPIO_Port GPIOB
+#define BUMPER1_EXTI_IRQn EXTI4_15_IRQn
 #define BUMPER0_Pin GPIO_PIN_9
 #define BUMPER0_GPIO_Port GPIOB
+#define BUMPER0_EXTI_IRQn EXTI4_15_IRQn
 
 /* USER CODE BEGIN Private defines */
 
