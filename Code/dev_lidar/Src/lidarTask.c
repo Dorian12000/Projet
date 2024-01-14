@@ -67,8 +67,7 @@ void setLidarState(lidarState_t state) {
  * The function uses a state machine to manage the different states of the Lidar task.
  * States:
  * - LIDAR_INIT: Initializes the Lidar device and transitions to LIDAR_SCANNING on success.
- * - LIDAR_SCANNING: Starts Lidar scanning and performs data processing. Transitions to LIDAR_PROCESS.
- * - LIDAR_PROCESS: Placeholder state for future processing if needed.
+ * - LIDAR_SCANNING: Starts Lidar scanning and performs data processing.
  * - LIDAR_STANDBY: Placeholder state for standby mode if needed.
  *
  * @note The task runs indefinitely in a loop, continuously monitoring and managing the Lidar device state.
