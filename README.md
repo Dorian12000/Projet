@@ -70,7 +70,7 @@ Le fichier `LidarTask.c` contient la définition de la tâche Lidar. Il gère le
 
 - **Gestion des erreurs** : En cas d'erreur lors du scan, la tâche passe à l'état d'erreur pour gérer la situation.
 
-2. **Utilisation du code :**
+3. **Utilisation du code :**
 
 	- **Création de la tâche Lidar** : La fonction `createLidarTask` dans `LidarTask.c` crée la tâche Lidar en utilisant FreeRTOS. Elle définit la profondeur de la pile et la priorité de la tâche.
 
@@ -80,7 +80,7 @@ Le fichier `LidarTask.c` contient la définition de la tâche Lidar. Il gère le
 
 	- **Analyse des données** : La fonction `whereIsNearestRobot` analyse les données du lidar pour déterminer la position du robot le plus proche. Cette fonction peut être adaptée en fonction des exigences spécifiques du projet.
 
-3. **Remarques :**
+4. **Remarques :**
 
 	- Le pilote du lidar est conçu pour fonctionner avec FreeRTOS. Assurez-vous que votre projet est configuré pour utiliser FreeRTOS.
 
