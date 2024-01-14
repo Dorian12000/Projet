@@ -18,6 +18,7 @@
 #include "../Inc/drv_lidar.h"
 #include "../Inc/logger.h"
 #include "../Inc/types.h"
+#include "mainTask.h"
 
 #include "../Inc/lidarTask.h"
 
@@ -118,27 +119,20 @@ TaskFunction_t lidarTask(void) {
 					lidarHandle.state = LIDAR_ERROR;
 					break;
 				}
-				//if(checkCS(&lidarScanData)){
+				if(checkCS(&lidarScanData)){
 					status = convertSample(&lidarScanData);
 					if(status != success) {
 						LOG_LIDAR_WARN("convert sample failed: %d", status);
 					}
-				//}
-				/*
-				if(robotState() == CAT) {
-					position_t *position = whereIsNearestRobot(); // TODO
+				}
+				
+				if(getMainState() == MAIN_CAT) {
+					position_t *position = whereIsNearestRobot(); 
 					
 				}
-				else {
+				else if (getMainState() == MAIN_MOUSE){
 					calculateOptimalDirection(); // TODO
 				}
-				*/
-				//osDelay(1000);
-			}
-			case LIDAR_PROCESS: {
-				
-				//lidarHandle.state = LIDAR_SCANNING;
-				break;
 			}
 			case LIDAR_STANDBY: {
 				break;

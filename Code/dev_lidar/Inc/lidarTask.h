@@ -18,7 +18,6 @@
 typedef enum {
 	LIDAR_INIT,
 	LIDAR_SCANNING,
-	LIDAR_PROCESS,
 	LIDAR_STANDBY,
 	LIDAR_ERROR,
 }lidarState_t;

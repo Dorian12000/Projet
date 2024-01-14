@@ -37,7 +37,7 @@ static SemaphoreHandle_t sem_uart_read = NULL;
 static position_t robotPosition = {0, 0};
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	if (huart->Instance == USART1)
+	if (huart->Instance == USART4)
 	{
 		BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
 		xSemaphoreGiveFromISR(sem_uart_read, &pxHigherPriorityTaskWoken);

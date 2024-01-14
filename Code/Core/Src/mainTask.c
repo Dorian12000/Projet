@@ -37,7 +37,6 @@ mainHandle_t mainHandle;
 
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 	LOG_MAIN_ENTER();
-	HAL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin);
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	if(GPIO_Pin == BUMPER_F_Pin) {
 		xTaskNotifyFromISR(h_task_main, BUMPER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken);
@@ -48,8 +47,10 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 	} else if(GPIO_Pin == BUMPER_L_Pin) {
 		xTaskNotifyFromISR(h_task_main, BUMPER_L_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
 	} else if(GPIO_Pin == BORDER_FRONT_Pin) {
+		HAL_GPIO_TogglePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin);
 		xTaskNotifyFromISR(getPositionMotorTaskHandle(), BORDER_F_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
 	} else if(GPIO_Pin == BORDER_BACK_Pin) {
+		HAL_GPIO_TogglePin(LED_ORANGE_GPIO_Port, LED_ORANGE_Pin);
 		xTaskNotifyFromISR(getPositionMotorTaskHandle(), BORDER_B_NOTIFY, eSetBits, &xHigherPriorityTaskWoken );
 	}
 	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
@@ -101,11 +102,9 @@ void mainTask(void *param) {
 			case MAIN_INIT: {
 				if(xTimerIsTimerActive(mainHandle.timer) == pdFALSE) {
 					xTimerStart(mainHandle.timer, 0);
-					//TODO create task
-					//positionMotorTaskCreate();
+					positionMotorTaskCreate();
 					asservMotorTaskCreate();
-					//createLidarTask();
-					HAL_GPIO_WritePin(GPIOB, LED_RED_Pin, GPIO_PIN_SET);
+					createLidarTask();
 				}
 				mainHandle.state = MAIN_MOUSE;
 				break;
@@ -113,14 +112,14 @@ void mainTask(void *param) {
 			case MAIN_CAT: {
 				if(xTimerIsTimerActive(mainHandle.timer) == pdFALSE) {
 					xTimerStart(mainHandle.timer, 0);
-					
+					HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
 				}
 				break;
 			}
 			case MAIN_MOUSE: {
 				if(xTimerIsTimerActive(mainHandle.timer) == pdFALSE) {
 					xTimerStart(mainHandle.timer, 0);
-					
+					HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 				}
 				break;
 			}
