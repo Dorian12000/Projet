@@ -38,37 +38,37 @@ Le pilote Lidar consiste en l'intégration d'un lidar dans un système robotique
 
 2. **Contenu des fichiers :**
 
-#### `drv_lidar.c`
+	#### `drv_lidar.c`
 
-Le fichier `drv_lidar.c` contient le code source pour le pilote du lidar. Il comprend les fonctionnalités suivantes :
+	Le fichier `drv_lidar.c` contient le code source pour le pilote du lidar. Il comprend les fonctionnalités suivantes :
 
-- **Initialisation du Lidar** : La fonction `LidarInit` initialise le lidar en configurant la communication UART, en créant un sémaphore pour la synchronisation des lectures UART, et en activant le l'échantillonage du lidar et son moteur.
+	- **Initialisation du Lidar** : La fonction `LidarInit` initialise le lidar en configurant la communication UART, en créant un sémaphore pour la synchronisation des lectures UART, et en activant le l'échantillonage du lidar et son moteur.
 
-- **Communication UART** : Le fichier utilise la communication UART avec le mécanisme DMA pour une transmission et réception de données efficace et non bloquante.
+	- **Communication UART** : Le fichier utilise la communication UART avec le mécanisme DMA pour une transmission et réception de données efficace et non bloquante.
 
-- **Commandes Lidar** : Les fonctions `LidarScanStart` et `LidarScanStop` envoient respectivement les commandes de démarrage et d'arrêt du scan au lidar.
+	- **Commandes Lidar** : Les fonctions `LidarScanStart` et `LidarScanStop` envoient respectivement les commandes de démarrage et d'arrêt du scan au lidar.
 
-- **Traitement des données** : Les fonctions `getLidarScanData`, `checkCS` et `convertSample` sont responsables de la réception, de la vérification de la somme de contrôle et de la conversion des données de scan du lidar.
+	- **Traitement des données** : Les fonctions `getLidarScanData`, `checkCS` et `convertSample` sont responsables de la réception, de la vérification de la somme de contrôle et de la conversion des données de scan du lidar.
 
-- **Analyse des données Lidar** : La fonction `whereIsNearestRobot` analyse les données du lidar pour déterminer la position du robot le plus proche.
+	- **Analyse des données Lidar** : La fonction `whereIsNearestRobot` analyse les données du lidar pour déterminer la position du robot le plus proche.
 
-- **Gestion des erreurs** : La fonction `LidarHealthStatus` permet d'obtenir le statut de santé du lidar et de gérer les erreurs éventuelles.
+	- **Gestion des erreurs** : La fonction `LidarHealthStatus` permet d'obtenir le statut de santé du lidar et de gérer les erreurs éventuelles.
 
-- **Autres fonctionnalités** : Le fichier contient également des fonctions pour définir la vitesse du lidar, obtenir des informations sur le lidar et redémarrer le lidar.
+	- **Autres fonctionnalités** : Le fichier contient également des fonctions pour définir la vitesse du lidar, obtenir des informations sur le lidar et redémarrer le lidar.
 
-#### `LidarTask.c`
+	#### `LidarTask.c`
 
-Le fichier `LidarTask.c` contient la définition de la tâche Lidar. Il gère les états de la tâche, notamment l'initialisation du lidar, le scan, le traitement des données et le mode veille.
+	Le fichier `LidarTask.c` contient la définition de la tâche Lidar. Il gère les états de la tâche, notamment l'initialisation du lidar, le scan, le traitement des données et le mode veille.
 
-- **États de la tâche** : Les états comprennent l'initialisation (`LIDAR_INIT`), le scan (`LIDAR_SCANNING`) et le mode veille (`LIDAR_STANDBY`).
+	- **États de la tâche** : Les états comprennent l'initialisation (`LIDAR_INIT`), le scan (`LIDAR_SCANNING`) et le mode veille (`LIDAR_STANDBY`).
 
-- **Initialisation** : La tâche commence par initialiser le lidar, récupérer des informations sur le lidar afin d'assurer son bon fonctionnement, puis passer à l'état de scan.
+	- **Initialisation** : La tâche commence par initialiser le lidar, récupérer des informations sur le lidar afin d'assurer son bon fonctionnement, puis passer à l'état de scan.
 
-- **Scan Lidar** : Dans cet état, la tâche démarre le scan du lidar, reçoit les données de scan, les traite et effectue des actions en fonction de l'état principal du système (CAT ou MOUSE).
+	- **Scan Lidar** : Dans cet état, la tâche démarre le scan du lidar, reçoit les données de scan, les traite et effectue des actions en fonction de l'état principal du système (CAT ou MOUSE).
 
-- **Mode veille** : Un état futur pour le mode veille est également prévu mais n'est pas encore implémenté.
+	- **Mode veille** : Un état futur pour le mode veille est également prévu mais n'est pas encore implémenté.
 
-- **Gestion des erreurs** : En cas d'erreur lors du scan, la tâche passe à l'état d'erreur pour gérer la situation.
+	- **Gestion des erreurs** : En cas d'erreur lors du scan, la tâche passe à l'état d'erreur pour gérer la situation.
 
 3. **Utilisation du code :**
 
