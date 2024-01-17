@@ -105,7 +105,7 @@ Les deux MCC sont controlés par des pwm et asservis en vitesse par un correcteu
 
 2. **Conversion de la position visée en commande de vitesse pour les moteurs :**
 
-   	Cette tâche recoit une structure comprenant la position (angle et distance) à laquelle doit se rendre le robot. Ces données sont interprétées pour générer une commande (vitesse et sens de rotation) pour chaque moteur. La commande est ensuite utilisée pour l'asservissement en vitesse.
+   	Cette tâche reçoit une structure comprenant la position (angle et distance) à laquelle doit se rendre le robot. Ces données sont interprétées pour générer une commande (vitesse et sens de rotation) pour chaque moteur. La commande est ensuite utilisée pour l'asservissement en vitesse.
 
 3. **Asservissement en vitesse :**
 
