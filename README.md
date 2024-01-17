@@ -27,7 +27,7 @@ https://miro.com/app/dashboard/
    - Pour connaître les événements enregistrés par le robot, veuillez connecter une ST-link entre le robot et votre ordinateur, puis ouvrir une console (TeraTerm, Putty, ...) configurée en 115200 bauds.
    - Trois LEDs sont présentes sur le robot pour indiquer son état en temps réel :
         - Led verte :
-        	- allumé : état chat
+        	- allumée : état chat
         	- éteinte : état souris
         - Led orange : changement d'état pour chaque détection de bordure.
         - Led rouge : le robot a rencontré un problème et doit être redémarré.
