@@ -26,7 +26,9 @@ https://miro.com/app/dashboard/
 2. **Interface Utilisateur :**
    - Pour connaître les événements enregistrés par le robot, veuillez connecter une ST-link entre le robot et votre ordinateur, puis ouvrir une console (TeraTerm, Putty, ...) configurée en 115200 bauds.
    - Trois LEDs sont présentes sur le robot pour indiquer son état en temps réel :
-        - Led verte : allumée pour l'état chat, éteinte pour l'état souris.
+        - Led verte :
+        	- allumé : état chat
+        	- éteinte : état souris
         - Led orange : changement d'état pour chaque détection de bordure.
         - Led rouge : le robot a rencontré un problème et doit être redémarré.
 
@@ -109,11 +111,11 @@ Les deux MCC sont controlés par des pwm et asservis en vitesse par un correcteu
 
 	La boucle d'asservissement en vitesse se fait toutes les 500 ms et comprend :
 
-- Récupération de la commande en vitesse en fonction de la position visée.
-- La lecture des encodeurs.
-- Le calcul de l'erreur entre la mesure et la commande en vitesse.
-- Le calcul de la nouvelle commande en vitesse par le correcteur proportionnel.
-- Transmission de la nouvelle commande de vitesse pour générer les pwm.
+	- Récupération de la commande en vitesse en fonction de la position visée.
+	- La lecture des encodeurs.
+	- Le calcul de l'erreur entre la mesure et la commande en vitesse.
+	- Le calcul de la nouvelle commande en vitesse par le correcteur proportionnel.
+	- Transmission de la nouvelle commande de vitesse pour générer les pwm.
 
 
 
