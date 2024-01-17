@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  0001ba31  00000000  00000000  0005515d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   000214de  00000000  00000000  00070b8e  2**0
+ 18 .debug_line   000214b7  00000000  00000000  00070b8e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0009baab  00000000  00000000  0009206c  2**0
+ 19 .debug_str    0009baab  00000000  00000000  00092045  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  0000656c  00000000  00000000  0012db18  2**2
+ 20 .debug_frame  0000656c  00000000  00000000  0012daf0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000005f  00000000  00000000  00134084  2**0
+ 21 .debug_line_str 0000005f  00000000  00000000  0013405c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -9390,16 +9390,16 @@ void vTaskAsservMotor(void *param)
  800437c:	2000011c 	.word	0x2000011c
 
 08004380 <positionMotorTaskCreate>:
-command_t command_motor_right;
-
-TaskHandle_t position_motor_task_h = NULL;
-
+ *       sont définies avec les valeurs appropriées avant d'appeler cette fonction.
+ *
+ * @see vTaskPositionMotor, STACK_SIZE_POSITION_MOTOR, TASK_PRIORITY_POSITION_MOTOR
+ */
 void positionMotorTaskCreate(void)
 {
  8004380:	b580      	push	{r7, lr}
  8004382:	b082      	sub	sp, #8
  8004384:	af02      	add	r7, sp, #8
-	if(xTaskCreate(vTaskPositionMotor, "Position Motor Task", STACK_SIZE_POSITION_MOTOR, NULL, TASK_PRIORITY_POSITION_MOTOR, &position_motor_task_h) != pdPASS)
+    if (xTaskCreate(vTaskPositionMotor, "Position Motor Task", STACK_SIZE_POSITION_MOTOR, NULL, TASK_PRIORITY_POSITION_MOTOR, &position_motor_task_h) != pdPASS)
  8004386:	23fa      	movs	r3, #250	; 0xfa
  8004388:	009a      	lsls	r2, r3, #2
  800438a:	490a      	ldr	r1, [pc, #40]	; (80043b4 <positionMotorTaskCreate+0x34>)
@@ -9413,14 +9413,14 @@ void positionMotorTaskCreate(void)
  800439c:	0003      	movs	r3, r0
  800439e:	2b01      	cmp	r3, #1
  80043a0:	d005      	beq.n	80043ae <positionMotorTaskCreate+0x2e>
-	{
-		printf("Error position motor task create\r\n");
+    {
+        printf("Error position motor task create\r\n");
  80043a2:	4b07      	ldr	r3, [pc, #28]	; (80043c0 <positionMotorTaskCreate+0x40>)
  80043a4:	0018      	movs	r0, r3
  80043a6:	f009 fb21 	bl	800d9ec <puts>
-		Error_Handler();
+        Error_Handler();
  80043aa:	f7ff f915 	bl	80035d8 <Error_Handler>
-	}
+    }
 }
  80043ae:	46c0      	nop			; (mov r8, r8)
  80043b0:	46bd      	mov	sp, r7
@@ -9431,13 +9431,15 @@ void positionMotorTaskCreate(void)
  80043c0:	080109e4 	.word	0x080109e4
 
 080043c4 <getPositionMotorTaskHandle>:
-
-
+ * permettant ainsi d'accéder à la tâche depuis d'autres parties du programme.
+ *
+ * @return La poignée (handle) de la tâche de positionnement moteur.
+ */
 TaskHandle_t getPositionMotorTaskHandle(void)
 {
  80043c4:	b580      	push	{r7, lr}
  80043c6:	af00      	add	r7, sp, #0
-	return position_motor_task_h;
+    return position_motor_task_h;
  80043c8:	4b02      	ldr	r3, [pc, #8]	; (80043d4 <getPositionMotorTaskHandle+0x10>)
  80043ca:	681b      	ldr	r3, [r3, #0]
 }
@@ -9448,26 +9450,27 @@ TaskHandle_t getPositionMotorTaskHandle(void)
  80043d4:	200001a4 	.word	0x200001a4
 
 080043d8 <vTaskPositionMotor>:
-
-
+ * puis ajuste les commandes des moteurs en conséquence.
+ *
+ * @param param Pointeur vers les paramètres de la tâche (non utilisé ici).
+ */
 void vTaskPositionMotor(void *param)
 {
  80043d8:	b580      	push	{r7, lr}
  80043da:	b088      	sub	sp, #32
  80043dc:	af00      	add	r7, sp, #0
  80043de:	6078      	str	r0, [r7, #4]
-	uint32_t notify_value;
-	position_t position_to_go = {19.0, 10};
+    uint32_t notify_value;
+    position_t position_to_go = {19.0, 10};
  80043e0:	230c      	movs	r3, #12
  80043e2:	18fb      	adds	r3, r7, r3
  80043e4:	4a22      	ldr	r2, [pc, #136]	; (8004470 <vTaskPositionMotor+0x98>)
  80043e6:	ca03      	ldmia	r2!, {r0, r1}
  80043e8:	c303      	stmia	r3!, {r0, r1}
 
-
-	for(;;)
-	{
-		if(xTaskNotifyWait(0, ULONG_MAX, &notify_value, portMAX_DELAY) == pdTRUE)
+    for (;;)
+    {
+        if (xTaskNotifyWait(0, ULONG_MAX, &notify_value, portMAX_DELAY) == pdTRUE)
  80043ea:	2301      	movs	r3, #1
  80043ec:	425b      	negs	r3, r3
  80043ee:	2214      	movs	r2, #20
@@ -9479,49 +9482,49 @@ void vTaskPositionMotor(void *param)
  80043fc:	0003      	movs	r3, r0
  80043fe:	2b01      	cmp	r3, #1
  8004400:	d1f3      	bne.n	80043ea <vTaskPositionMotor+0x12>
-		{
-			if(notify_value == BORDER_F_NOTIFY) // Notification ISR capteurs bordure
+        {
+            if (notify_value == BORDER_F_NOTIFY) // Notification ISR capteurs bordure
  8004402:	697b      	ldr	r3, [r7, #20]
  8004404:	2b04      	cmp	r3, #4
  8004406:	d10c      	bne.n	8004422 <vTaskPositionMotor+0x4a>
-			{
-				// Gauche stop, Droit stop
-				command_motor_left.speed  = 0;
+            {
+                // Gauche stop, Droit stop
+                command_motor_left.speed = 0;
  8004408:	4b1a      	ldr	r3, [pc, #104]	; (8004474 <vTaskPositionMotor+0x9c>)
  800440a:	2200      	movs	r2, #0
  800440c:	705a      	strb	r2, [r3, #1]
-				command_motor_left.dir  = STOP;
+                command_motor_left.dir   = STOP;
  800440e:	4b19      	ldr	r3, [pc, #100]	; (8004474 <vTaskPositionMotor+0x9c>)
  8004410:	2202      	movs	r2, #2
  8004412:	701a      	strb	r2, [r3, #0]
-				command_motor_right.speed = 0;
+                command_motor_right.speed = 0;
  8004414:	4b18      	ldr	r3, [pc, #96]	; (8004478 <vTaskPositionMotor+0xa0>)
  8004416:	2200      	movs	r2, #0
  8004418:	705a      	strb	r2, [r3, #1]
-				command_motor_right.dir = STOP;
+                command_motor_right.dir  = STOP;
  800441a:	4b17      	ldr	r3, [pc, #92]	; (8004478 <vTaskPositionMotor+0xa0>)
  800441c:	2202      	movs	r2, #2
  800441e:	701a      	strb	r2, [r3, #0]
  8004420:	e7e3      	b.n	80043ea <vTaskPositionMotor+0x12>
-			else // Nouvelle notification de position
-			{
-				// TODO : Choper la structure position_t du lidar
-					// position_to_go = getPositionLidar();
+            }
+            else // Nouvelle notification de position
+            {
+                // TODO: Choper la structure position_t du Lidar
 
-				float angle = position_to_go.angle;
+                float angle = position_to_go.angle;
  8004422:	220c      	movs	r2, #12
  8004424:	18bb      	adds	r3, r7, r2
  8004426:	681b      	ldr	r3, [r3, #0]
  8004428:	61fb      	str	r3, [r7, #28]
-				uint16_t distance = position_to_go.distance;
+                uint16_t distance = position_to_go.distance;
  800442a:	231a      	movs	r3, #26
  800442c:	18fb      	adds	r3, r7, r3
  800442e:	18ba      	adds	r2, r7, r2
  8004430:	8892      	ldrh	r2, [r2, #4]
  8004432:	801a      	strh	r2, [r3, #0]
 
-				// Gestion du positionnement en angle en priorité
-				if(angle != 0 || angle != 180)
+                // Gestion du positionnement en angle en priorité
+                if (angle != 0 || angle != 180)
  8004434:	2100      	movs	r1, #0
  8004436:	69f8      	ldr	r0, [r7, #28]
  8004438:	f7fc f838 	bl	80004ac <__aeabi_fcmpeq>
@@ -9532,31 +9535,31 @@ void vTaskPositionMotor(void *param)
  8004444:	f7fc f832 	bl	80004ac <__aeabi_fcmpeq>
  8004448:	1e03      	subs	r3, r0, #0
  800444a:	d104      	bne.n	8004456 <vTaskPositionMotor+0x7e>
-				{
-					// Met à jour les état et la vitesse de chaque moteur
-					angleToCommand(angle);
+                {
+                    // Met à jour les états et la vitesse de chaque moteur en fonction de l'angle
+                    angleToCommand(angle);
  800444c:	69fb      	ldr	r3, [r7, #28]
  800444e:	1c18      	adds	r0, r3, #0
  8004450:	f000 f816 	bl	8004480 <angleToCommand>
  8004454:	e00b      	b.n	800446e <vTaskPositionMotor+0x96>
-				}
-				// Vers la direction en ligne droite une fois que le robot est orienté correctement
-				else if(distance > 0)
+                }
+                // Vers la direction en ligne droite une fois que le robot est orienté correctement
+                else if (distance > 0)
  8004456:	211a      	movs	r1, #26
  8004458:	187b      	adds	r3, r7, r1
  800445a:	881b      	ldrh	r3, [r3, #0]
  800445c:	2b00      	cmp	r3, #0
  800445e:	d0c4      	beq.n	80043ea <vTaskPositionMotor+0x12>
-				{
-					// Met à jour les état et la vitesse de chaque moteur
-					distanceToCommand(distance, angle);
+                {
+                    // Met à jour les états et la vitesse de chaque moteur en fonction de la distance
+                    distanceToCommand(distance, angle);
  8004460:	69fa      	ldr	r2, [r7, #28]
  8004462:	187b      	adds	r3, r7, r1
  8004464:	881b      	ldrh	r3, [r3, #0]
  8004466:	1c11      	adds	r1, r2, #0
  8004468:	0018      	movs	r0, r3
  800446a:	f000 f873 	bl	8004554 <distanceToCommand>
-		if(xTaskNotifyWait(0, ULONG_MAX, &notify_value, portMAX_DELAY) == pdTRUE)
+        if (xTaskNotifyWait(0, ULONG_MAX, &notify_value, portMAX_DELAY) == pdTRUE)
  800446e:	e7bc      	b.n	80043ea <vTaskPositionMotor+0x12>
  8004470:	08010a08 	.word	0x08010a08
  8004474:	2000019c 	.word	0x2000019c
@@ -9564,17 +9567,17 @@ void vTaskPositionMotor(void *param)
  800447c:	43340000 	.word	0x43340000
 
 08004480 <angleToCommand>:
-	}
-}
-
-// Gère les virage du robot
+ * en fonction des quadrants de l'angle.
+ *
+ * @param angle Angle de rotation du robot.
+ */
 void angleToCommand(float angle)
 {
  8004480:	b580      	push	{r7, lr}
  8004482:	b082      	sub	sp, #8
  8004484:	af00      	add	r7, sp, #0
  8004486:	6078      	str	r0, [r7, #4]
-	if(angle > 0 && angle <= 90)
+    if (angle > 0 && angle <= 90)
  8004488:	2100      	movs	r1, #0
  800448a:	6878      	ldr	r0, [r7, #4]
  800448c:	f7fc f828 	bl	80004e0 <__aeabi_fcmpgt>
@@ -9585,27 +9588,27 @@ void angleToCommand(float angle)
  8004498:	f7fc f818 	bl	80004cc <__aeabi_fcmple>
  800449c:	1e03      	subs	r3, r0, #0
  800449e:	d00c      	beq.n	80044ba <angleToCommand+0x3a>
-	{
-		// Gauche en avant, Droit moins vite
-		command_motor_left.speed  = 100;
+    {
+        // Gauche en avant, Droit moins vite
+        command_motor_left.speed  = 100;
  80044a0:	4b28      	ldr	r3, [pc, #160]	; (8004544 <angleToCommand+0xc4>)
  80044a2:	2264      	movs	r2, #100	; 0x64
  80044a4:	705a      	strb	r2, [r3, #1]
-		command_motor_left.dir  = FWD;
+        command_motor_left.dir    = FWD;
  80044a6:	4b27      	ldr	r3, [pc, #156]	; (8004544 <angleToCommand+0xc4>)
  80044a8:	2200      	movs	r2, #0
  80044aa:	701a      	strb	r2, [r3, #0]
-		command_motor_right.speed = 20;
+        command_motor_right.speed = 20;
  80044ac:	4b26      	ldr	r3, [pc, #152]	; (8004548 <angleToCommand+0xc8>)
  80044ae:	2214      	movs	r2, #20
  80044b0:	705a      	strb	r2, [r3, #1]
-		command_motor_right.dir = FWD;
+        command_motor_right.dir   = FWD;
  80044b2:	4b25      	ldr	r3, [pc, #148]	; (8004548 <angleToCommand+0xc8>)
  80044b4:	2200      	movs	r2, #0
  80044b6:	701a      	strb	r2, [r3, #0]
  80044b8:	e03e      	b.n	8004538 <angleToCommand+0xb8>
-	}
-	else if(angle > 90 && angle <= 180)
+    }
+    else if (angle > 90 && angle <= 180)
  80044ba:	4921      	ldr	r1, [pc, #132]	; (8004540 <angleToCommand+0xc0>)
  80044bc:	6878      	ldr	r0, [r7, #4]
  80044be:	f7fc f80f 	bl	80004e0 <__aeabi_fcmpgt>
@@ -9616,27 +9619,27 @@ void angleToCommand(float angle)
  80044ca:	f7fb ffff 	bl	80004cc <__aeabi_fcmple>
  80044ce:	1e03      	subs	r3, r0, #0
  80044d0:	d00c      	beq.n	80044ec <angleToCommand+0x6c>
-	{
-		// Gauche en arrière, Droit moins vite
-		command_motor_left.speed  = 100;
+    {
+        // Gauche en arrière, Droit moins vite
+        command_motor_left.speed  = 100;
  80044d2:	4b1c      	ldr	r3, [pc, #112]	; (8004544 <angleToCommand+0xc4>)
  80044d4:	2264      	movs	r2, #100	; 0x64
  80044d6:	705a      	strb	r2, [r3, #1]
-		command_motor_left.dir  = REV;
+        command_motor_left.dir    = REV;
  80044d8:	4b1a      	ldr	r3, [pc, #104]	; (8004544 <angleToCommand+0xc4>)
  80044da:	2201      	movs	r2, #1
  80044dc:	701a      	strb	r2, [r3, #0]
-		command_motor_right.speed = 20;
+        command_motor_right.speed = 20;
  80044de:	4b1a      	ldr	r3, [pc, #104]	; (8004548 <angleToCommand+0xc8>)
  80044e0:	2214      	movs	r2, #20
  80044e2:	705a      	strb	r2, [r3, #1]
-		command_motor_right.dir = REV;
+        command_motor_right.dir   = REV;
  80044e4:	4b18      	ldr	r3, [pc, #96]	; (8004548 <angleToCommand+0xc8>)
  80044e6:	2201      	movs	r2, #1
  80044e8:	701a      	strb	r2, [r3, #0]
  80044ea:	e025      	b.n	8004538 <angleToCommand+0xb8>
-	}
-	else if(angle > 180 && angle <= 270)
+    }
+    else if (angle > 180 && angle <= 270)
  80044ec:	4917      	ldr	r1, [pc, #92]	; (800454c <angleToCommand+0xcc>)
  80044ee:	6878      	ldr	r0, [r7, #4]
  80044f0:	f7fb fff6 	bl	80004e0 <__aeabi_fcmpgt>
@@ -9647,46 +9650,46 @@ void angleToCommand(float angle)
  80044fc:	f7fb ffe6 	bl	80004cc <__aeabi_fcmple>
  8004500:	1e03      	subs	r3, r0, #0
  8004502:	d00c      	beq.n	800451e <angleToCommand+0x9e>
-	{
-		// Gauche moins vite, Droit en arrière
-		command_motor_left.speed  = 20;
+    {
+        // Gauche moins vite, Droit en arrière
+        command_motor_left.speed  = 20;
  8004504:	4b0f      	ldr	r3, [pc, #60]	; (8004544 <angleToCommand+0xc4>)
  8004506:	2214      	movs	r2, #20
  8004508:	705a      	strb	r2, [r3, #1]
-		command_motor_left.dir  = REV;
+        command_motor_left.dir    = REV;
  800450a:	4b0e      	ldr	r3, [pc, #56]	; (8004544 <angleToCommand+0xc4>)
  800450c:	2201      	movs	r2, #1
  800450e:	701a      	strb	r2, [r3, #0]
-		command_motor_right.speed = 100;
+        command_motor_right.speed = 100;
  8004510:	4b0d      	ldr	r3, [pc, #52]	; (8004548 <angleToCommand+0xc8>)
  8004512:	2264      	movs	r2, #100	; 0x64
  8004514:	705a      	strb	r2, [r3, #1]
-		command_motor_right.dir = REV;
+        command_motor_right.dir   = REV;
  8004516:	4b0c      	ldr	r3, [pc, #48]	; (8004548 <angleToCommand+0xc8>)
  8004518:	2201      	movs	r2, #1
  800451a:	701a      	strb	r2, [r3, #0]
  800451c:	e00c      	b.n	8004538 <angleToCommand+0xb8>
-	}
-	else
-	{
-		// Gauche moins vite, Droit en avant
-		command_motor_left.speed  = 20;
+    }
+    else
+    {
+        // Gauche moins vite, Droit en avant
+        command_motor_left.speed  = 20;
  800451e:	4b09      	ldr	r3, [pc, #36]	; (8004544 <angleToCommand+0xc4>)
  8004520:	2214      	movs	r2, #20
  8004522:	705a      	strb	r2, [r3, #1]
-		command_motor_left.dir  = FWD;
+        command_motor_left.dir    = FWD;
  8004524:	4b07      	ldr	r3, [pc, #28]	; (8004544 <angleToCommand+0xc4>)
  8004526:	2200      	movs	r2, #0
  8004528:	701a      	strb	r2, [r3, #0]
-		command_motor_right.speed = 100;
+        command_motor_right.speed = 100;
  800452a:	4b07      	ldr	r3, [pc, #28]	; (8004548 <angleToCommand+0xc8>)
  800452c:	2264      	movs	r2, #100	; 0x64
  800452e:	705a      	strb	r2, [r3, #1]
-		command_motor_right.dir = FWD;
+        command_motor_right.dir   = FWD;
  8004530:	4b05      	ldr	r3, [pc, #20]	; (8004548 <angleToCommand+0xc8>)
  8004532:	2200      	movs	r2, #0
  8004534:	701a      	strb	r2, [r3, #0]
-	}
+    }
 }
  8004536:	46c0      	nop			; (mov r8, r8)
  8004538:	46c0      	nop			; (mov r8, r8)
@@ -9700,8 +9703,10 @@ void angleToCommand(float angle)
  8004550:	43870000 	.word	0x43870000
 
 08004554 <distanceToCommand>:
-
-// Déplacement en ligne droite
+ *
+ * @param distance Distance à parcourir en ligne droite.
+ * @param angle    Angle de la trajectoire (0 ou 180 degrés).
+ */
 void distanceToCommand(uint16_t distance, float angle)
 {
  8004554:	b580      	push	{r7, lr}
@@ -9711,38 +9716,38 @@ void distanceToCommand(uint16_t distance, float angle)
  800455c:	6039      	str	r1, [r7, #0]
  800455e:	1dbb      	adds	r3, r7, #6
  8004560:	801a      	strh	r2, [r3, #0]
-	if(angle == 180)
+    if (angle == 180)
  8004562:	4915      	ldr	r1, [pc, #84]	; (80045b8 <distanceToCommand+0x64>)
  8004564:	6838      	ldr	r0, [r7, #0]
  8004566:	f7fb ffa1 	bl	80004ac <__aeabi_fcmpeq>
  800456a:	1e03      	subs	r3, r0, #0
  800456c:	d00c      	beq.n	8004588 <distanceToCommand+0x34>
-	{
-		// Gauche en arrière, Droit en arrière
-		command_motor_left.speed  = 100;
+    {
+        // Gauche en arrière, Droit en arrière
+        command_motor_left.speed  = 100;
  800456e:	4b13      	ldr	r3, [pc, #76]	; (80045bc <distanceToCommand+0x68>)
  8004570:	2264      	movs	r2, #100	; 0x64
  8004572:	705a      	strb	r2, [r3, #1]
-		command_motor_left.dir  = REV;
+        command_motor_left.dir    = REV;
  8004574:	4b11      	ldr	r3, [pc, #68]	; (80045bc <distanceToCommand+0x68>)
  8004576:	2201      	movs	r2, #1
  8004578:	701a      	strb	r2, [r3, #0]
-		command_motor_right.speed = 100;
+        command_motor_right.speed = 100;
  800457a:	4b11      	ldr	r3, [pc, #68]	; (80045c0 <distanceToCommand+0x6c>)
  800457c:	2264      	movs	r2, #100	; 0x64
  800457e:	705a      	strb	r2, [r3, #1]
-		command_motor_right.dir = REV;
+        command_motor_right.dir   = REV;
  8004580:	4b0f      	ldr	r3, [pc, #60]	; (80045c0 <distanceToCommand+0x6c>)
  8004582:	2201      	movs	r2, #1
  8004584:	701a      	strb	r2, [r3, #0]
-		command_motor_left.speed  = 100;
-		command_motor_left.dir  = FWD;
-		command_motor_right.speed = 100;
-		command_motor_right.dir = FWD;
-	}
+        command_motor_left.speed  = 100;
+        command_motor_left.dir    = FWD;
+        command_motor_right.speed = 100;
+        command_motor_right.dir   = FWD;
+    }
 }
  8004586:	e012      	b.n	80045ae <distanceToCommand+0x5a>
-	else if (angle == 0)
+    else if (angle == 0)
  8004588:	2100      	movs	r1, #0
  800458a:	6838      	ldr	r0, [r7, #0]
  800458c:	f7fb ff8e 	bl	80004ac <__aeabi_fcmpeq>
@@ -9750,19 +9755,19 @@ void distanceToCommand(uint16_t distance, float angle)
  8004592:	d100      	bne.n	8004596 <distanceToCommand+0x42>
 }
  8004594:	e00b      	b.n	80045ae <distanceToCommand+0x5a>
-		command_motor_left.speed  = 100;
+        command_motor_left.speed  = 100;
  8004596:	4b09      	ldr	r3, [pc, #36]	; (80045bc <distanceToCommand+0x68>)
  8004598:	2264      	movs	r2, #100	; 0x64
  800459a:	705a      	strb	r2, [r3, #1]
-		command_motor_left.dir  = FWD;
+        command_motor_left.dir    = FWD;
  800459c:	4b07      	ldr	r3, [pc, #28]	; (80045bc <distanceToCommand+0x68>)
  800459e:	2200      	movs	r2, #0
  80045a0:	701a      	strb	r2, [r3, #0]
-		command_motor_right.speed = 100;
+        command_motor_right.speed = 100;
  80045a2:	4b07      	ldr	r3, [pc, #28]	; (80045c0 <distanceToCommand+0x6c>)
  80045a4:	2264      	movs	r2, #100	; 0x64
  80045a6:	705a      	strb	r2, [r3, #1]
-		command_motor_right.dir = FWD;
+        command_motor_right.dir   = FWD;
  80045a8:	4b05      	ldr	r3, [pc, #20]	; (80045c0 <distanceToCommand+0x6c>)
  80045aa:	2200      	movs	r2, #0
  80045ac:	701a      	strb	r2, [r3, #0]
