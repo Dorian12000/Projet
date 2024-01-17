@@ -2,7 +2,7 @@
 
 # Robot Chat et Souris
 
-Ce projet consiste à créer un robot capable de jouer au jeu du chat et de la souris. Le robot est équipé de plusieurs fonctionnalités clés, notamment le contrôle de mouvement à l'aide de moteurs à courant continu (MCC), la localisation avec un Lidar X4, et la détection du vide à l'aide de capteurs de bordure.
+Ce projet consiste à créer un robot capable de jouer au jeu du chat et de la souris. Le robot est équipé de plusieurs fonctionnalités clés, notamment le contrôle de mouvement à l'aide de moteurs à courant continu (MCC), la localisation avec un Lidar YD X4, la détection du vide à l'aide de capteurs de bordure et le changement d'état ( Souris , Chat) grâce aux bumpers. 
 
 ## Schéma Fonctionnel : 
 https://miro.com/app/dashboard/
@@ -17,6 +17,9 @@ https://miro.com/app/dashboard/
 
 3. **Détection du Vide avec Capteurs de Bordure :**
    - Les capteurs de bordure sont utilisés pour détecter les zones sans sol, afin d'empêcher le robot de tomber.
+
+4. ** Changement d'états (Souris, Chat) grâce aux bumpers : **
+   - Utilisation de  bumpers placés sur chaque côté du robot. Lorsqu'un des bumpers est touché, on change  l'état du robot. 
 
 ## Utilisation
 
@@ -93,6 +96,7 @@ Le pilote Lidar consiste en l'intégration d'un lidar dans un système robotique
 	- La tâche Lidar s'exécute en boucle continue, surveillant et gérant l'état du dispositif lidar.
 
 	- Des types de données personnalisés et des macros de journalisation sont définis dans `types.h` et `logger.h`, respectivement.
+
 
 
 ## Contrôle moteur et asservissement en vitesse
