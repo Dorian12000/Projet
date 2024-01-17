@@ -95,25 +95,25 @@ Le pilote Lidar consiste en l'intégration d'un lidar dans un système robotique
 
 ## Contrôle moteur et asservissement en vitesse
 
-Les deux moteurs MCC sont controlés par des pwm et asservis en vitesse par un correcteur proportionnel dans une tâche.
+Les deux MCC sont controlés par des pwm et asservis en vitesse par un correcteur proportionnel dans une tâche.
 
 1. **Driver de moteur :**
 
-    	Les fichier moteur_drv.c/.h contiennent les fonctions permettant de commander la vitesse ainsi que la directions des moteurs et de générer les pwm en conséquence. Ils prévoient aussi le calcul de la vitesse des moteurs et la lecture des encodeurs.
+   Les fichiers `moteur_drv.c/.h` contiennent les fonctions permettant de commander la vitesse ainsi que les directions des moteurs et de générer les pwm en conséquence. Ils prévoient aussi le calcul de la vitesse des moteurs et la lecture des encodeurs.
 
 2. **Conversion de la position visée en commande de vitesse pour les moteurs :**
 
-   	Cette tâche recois une structure comprennant la position (angle et distance) à laquelle doit se rendre le robots. Ces données sont interprétées pour générer une commande (vitesse et sens de rotation) pour chaque moteur. La commande est ensuite utilisée pour l'asservissement en vitesse?
+   	Cette tâche recoit une structure comprenant la position (angle et distance) à laquelle doit se rendre le robot. Ces données sont interprétées pour générer une commande (vitesse et sens de rotation) pour chaque moteur. La commande est ensuite utilisée pour l'asservissement en vitesse.
 
 3. **Asservissement en vitesse :**
 
-	La boucle d'asservissement en vitesse se fait toute les 500ms et comprend :
+	La boucle d'asservissement en vitesse se fait toutes les 500 ms et comprend :
 
-		- Récupération de la commande en vitesse en fonction de la position visée.
-    		- La lecture des encodeurs.
-    		- Le calcul de l'erreur entre la mesure et la commande en vitesse.
-    		- Le calcul de la nouvelle commande en vitesse par le correcteur proportionnel.
-    		- Transmission de la nouvelle commande de vitesse pour générer les pwm.
+	- Récupération de la commande en vitesse en fonction de la position visée.
+	- La lecture des encodeurs.
+    	- Le calcul de l'erreur entre la mesure et la commande en vitesse.
+    	- Le calcul de la nouvelle commande en vitesse par le correcteur proportionnel.
+    	- Transmission de la nouvelle commande de vitesse pour générer les pwm.
 
 
 
