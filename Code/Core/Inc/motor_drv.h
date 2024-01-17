@@ -15,7 +15,8 @@
 #define MIN_SPEED 0
 
 #define RES_ENCODER 224.4
-#define READ_MOTOR_ENCODER(motor_t) (motor_t).htim_enc->Instance->CNT
+#define MAX_ENCODER_VALUE 65535
+#define READ_MOTOR_ENCODER(motor_t) __HAL_TIM_GET_COUNTER((motor_t).htim_enc )
 
 typedef enum h_motor_state
 {
@@ -42,6 +43,6 @@ void setMotorSpeedFwd(h_motor_t *motor, uint8_t speed);
 void setMotorSpeedRev(h_motor_t *motor, uint8_t speed);
 void setMotorSpeed(h_motor_t *motor, uint8_t speed, h_motor_state dir);
 void stopMotor(h_motor_t *motor);
-float getSpeed(uint32_t enc_prev, uint32_t enc_curr, uint16_t time_ms);
+uint8_t getSpeed(h_motor_t *motor, uint32_t enc_prev, uint32_t enc_curr, uint16_t time_ms);
 
 #endif /* INC_MOTOR_DRV_H_ */

@@ -144,8 +144,8 @@ int main(void)
 	}
 
 	// PID struct init
-	initPID(&pid_motor_left, 0.5, 1.0, 1.0, TE);
-	initPID(&pid_motor_right, 0.5, 1.0, 1.0, TE);
+	initPID(&pid_motor_left, 0.5, 0, 0, TE);
+	initPID(&pid_motor_right, 0.5, 0, 0, TE);
 
 	// Motor struct init
 	initMotor(&motor_left, &pwm_fwd_left, &pwm_rev_left, &htim3);

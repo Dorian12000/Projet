@@ -130,7 +130,7 @@ TaskFunction_t lidarTask(void) {
 					
 				}
 				else if (getMainState() == MAIN_MOUSE){
-					calculateOptimalDirection(); // TODO
+					//calculateOptimalDirection(); // TODO
 				}
 			}
 			case LIDAR_STANDBY: {

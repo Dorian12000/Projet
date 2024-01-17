@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #define PID_ORDRE 3
-#define TE 10 // ms
+#define TE 500 // ms
 
 typedef struct PID_struct
 {
@@ -27,7 +27,7 @@ extern PID pid_motor_left;
 extern PID pid_motor_right;
 
 void initPID(PID *pid, float kp, float ki, float kd, float Te);
-void error(PID *pid, uint8_t speed_cmd, float speed_mes);
-float correcteur(PID *pid);
+void error(PID *pid, uint8_t speed_cmd, uint8_t speed_mes);
+uint8_t correcteur(PID *pid);
 
 #endif /* INC_PID_H_ */
