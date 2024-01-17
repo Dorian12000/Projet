@@ -97,11 +97,11 @@ Le pilote Lidar consiste en l'intégration d'un lidar dans un système robotique
 
 Les deux moteurs MCC sont controlés par des pwm et asservis en vitesse par un correcteur proportionnel dans une tâche.
 
-1. **Driver de moteur**
+1. **Driver de moteur :**
 
     	Les fichier moteur_drv.c/.h contiennent les fonctions permettant de commander la vitesse ainsi que la directions des moteurs et de générer les pwm en conséquence. Ils prévoient aussi le calcul de la vitesse des moteurs et la lecture des encodeurs.
 
- 2. **Asservissement en vitesse**
+ 2. **Asservissement en vitesse :**
 
     	La boucle d'asservissement en vitesse se fait toute les 500ms et comprend :
     		- La lecture des encodeurs.
