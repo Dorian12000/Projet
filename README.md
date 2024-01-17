@@ -15,11 +15,9 @@ https://miro.com/app/dashboard/
 2. **Localisation avec Lidar X4 :**
    - Utilisation du Lidar X4 pour permettre au robot de s'orienter et de se repérer dans son environnement.
 
-3. **Détection du Vide avec Capteurs de Bordure :**
+3. **Détection du Vide avec Capteurs de Bordure et Changement d'état :**
    - Les capteurs de bordure sont utilisés pour détecter les zones sans sol, afin d'empêcher le robot de tomber.
-
-4. ** Changement d'états (Souris, Chat) grâce aux bumpers : **
-   - Utilisation de  bumpers placés sur chaque côté du robot. Lorsqu'un des bumpers est touché, on change  l'état du robot. 
+   - Changement d'états (Souris, Chat) grâce aux bumpers : Utilisation de  bumpers placés sur chaque côté du robot. Lorsqu'un des bumpers est touché, on change  l'état du robot. 
 
 ## Utilisation
 
@@ -97,6 +95,17 @@ Le pilote Lidar consiste en l'intégration d'un lidar dans un système robotique
 
 	- Des types de données personnalisés et des macros de journalisation sont définis dans `types.h` et `logger.h`, respectivement.
 
+# Organisation des tâches 
+
+Pour organiser nos tâches liées aux différentes fonctions du Lidar et des moteurs, nous avons crée une tache principale avec une priorité élevée ( code source dans mainTask.c). Cette tâche est divisé en plusieurs états :
+   - Main Init : Initialisation des tâches de démarrage du Lidar, des moteurs et de l'asservissement.
+   - ERROR : Gestion d'erreur
+   - Mouse : Test de l'état avec une Led
+   - CAT : Test de l'état avec une Led
+( Pour l'état CAT/MOUSE, des notifications sont générées lorsque les bumpers sont appuyés)
+   
+   
+Chaque état implique l'appels des tâches et des fonctions nécessaires. Un timer est configuré pour suivre l'état actuel du robot.
 
 
 ## Contrôle moteur et asservissement en vitesse
