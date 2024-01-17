@@ -104,6 +104,7 @@ Les deux moteurs MCC sont controlés par des pwm et asservis en vitesse par un c
  2. **Asservissement en vitesse :**
 
 	La boucle d'asservissement en vitesse se fait toute les 500ms et comprend :
+
 		- Récupération de la commande en vitesse en fonction de la position visée.
     		- La lecture des encodeurs.
     		- Le calcul de l'erreur entre la mesure et la commande en vitesse.
