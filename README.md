@@ -109,11 +109,11 @@ Les deux MCC sont controlés par des pwm et asservis en vitesse par un correcteu
 
 	La boucle d'asservissement en vitesse se fait toutes les 500 ms et comprend :
 
-	- Récupération de la commande en vitesse en fonction de la position visée.
-	- La lecture des encodeurs.
-    	- Le calcul de l'erreur entre la mesure et la commande en vitesse.
-    	- Le calcul de la nouvelle commande en vitesse par le correcteur proportionnel.
-    	- Transmission de la nouvelle commande de vitesse pour générer les pwm.
+- Récupération de la commande en vitesse en fonction de la position visée.
+- La lecture des encodeurs.
+- Le calcul de l'erreur entre la mesure et la commande en vitesse.
+- Le calcul de la nouvelle commande en vitesse par le correcteur proportionnel.
+- Transmission de la nouvelle commande de vitesse pour générer les pwm.
 
 
 
