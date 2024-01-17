@@ -101,7 +101,11 @@ Les deux moteurs MCC sont controlés par des pwm et asservis en vitesse par un c
 
     	Les fichier moteur_drv.c/.h contiennent les fonctions permettant de commander la vitesse ainsi que la directions des moteurs et de générer les pwm en conséquence. Ils prévoient aussi le calcul de la vitesse des moteurs et la lecture des encodeurs.
 
- 2. **Asservissement en vitesse :**
+2. **Conversion de la position visée en commande de vitesse pour les moteurs :**
+
+   	Cette tâche recois une structure comprennant la position (angle et distance) à laquelle doit se rendre le robots. Ces données sont interprétées pour générer une commande (vitesse et sens de rotation) pour chaque moteur. La commande est ensuite utilisée pour l'asservissement en vitesse?
+
+3. **Asservissement en vitesse :**
 
 	La boucle d'asservissement en vitesse se fait toute les 500ms et comprend :
 
